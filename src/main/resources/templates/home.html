@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Моят профил – EventApp</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    </head>
+<body class="landing">
+<header class="landing-header">
+    <div class="container topbar">
+        <a class="brand" th:href="@{/}">EventApp</a>
+        <nav class="nav">
+            <a class="nav-link" th:href="@{/events}">Събития</a>
+            <a class="nav-link" th:href="@{/logout}">Изход</a>
+            <button id="themeToggle" class="icon-btn" aria-label="Превключи тема">🌓</button>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="hero slim-hero">
+        <div class="container hero-inner">
+            <div class="hero-badge reveal">Твоето табло</div>
+            <h1 class="hero-title" th:text="${user != null ? 'Здравей, ' + user.username : 'Моят профил'}">Моят профил</h1>
+            <p class="hero-subtitle">Твоите записани събития и предстоящи преживявания</p>
+            <div class="hero-actions">
+                <a class="btn btn-secondary" th:href="@{/profile}">Моят профил</a>
+                <a class="btn btn-primary" th:href="@{/events}">Открий събития</a>
+                <a class="btn btn-secondary" th:href="@{/}">Към началото</a>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat reveal">
+                    <div class="stat-num" th:attr="data-target=${#lists.size(subscriptions)}">0</div>
+                    <div class="stat-label">мои регистрации</div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-bg"></div>
+    </section>
+
+    <div class="container">
+        <div class="card">
+            <h2 class="mt-0 reveal">Моите регистрации</h2>
+            <div class="reveal" th:if="${#lists.isEmpty(subscriptions)}">Все още нямаш записи за събития.</div>
+            <div class="grid" th:if="${!#lists.isEmpty(subscriptions)}">
+                <article class="feature-card reveal" th:each="sub : ${subscriptions}">
+                    <h3 th:text="${sub.event.name}">Име на събитието</h3>
+                    <p th:text="${sub.event.description}">Кратко описание</p>
+                    <div class="meta">
+                        <span th:text="${#temporals.format(sub.event.startTime, 'dd.MM.yyyy HH:mm')}">Начало</span>
+                    </div>
+                    <a class="btn" th:href="@{'/events/' + ${sub.event.id}}">Детайли</a>
+                </article>
+            </div>
+            <div class="reveal" style="margin-top:12px">
+                <a class="btn" th:href="@{/events}">Открий събития</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    (function theme(){
+        const btn = document.getElementById('themeToggle');
+        if(!btn) return;
+        const key = 'eventapp-theme';
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const saved = localStorage.getItem(key);
+        const apply = (m)=>{ document.documentElement.dataset.theme = m; localStorage.setItem(key,m); };
+        apply(saved || (prefersDark ? 'dark' : 'light'));
+        btn.addEventListener('click', ()=> apply(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
+    })();
+
+    const onReveal = (entries, observer) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); observer.unobserve(e.target);} });
+    };
+    const observer = new IntersectionObserver(onReveal, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
+
+

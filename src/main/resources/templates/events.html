@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Събития – EventApp</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body class="landing">
+<header class="landing-header">
+    <div class="container topbar">
+        <a class="brand" th:href="@{/}">EventApp</a>
+        <nav class="nav">
+            <a class="nav-link" th:href="@{/home}">Моите</a>
+            <a class="nav-link" th:href="@{/logout}">Изход</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="hero slim-hero">
+        <div class="container hero-inner">
+            <h1 class="hero-title">Събития</h1>
+            <p class="hero-subtitle">Избери събитие и се запиши</p>
+        </div>
+        <div class="hero-bg"></div>
+    </section>
+
+    <div class="container">
+        <div class="card">
+            <p>Тук ще бъде списъкът със събития и бутон „Запиши се“.</p>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>
+
+

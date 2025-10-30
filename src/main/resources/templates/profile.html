@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Моят профил – EventApp</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body class="landing">
+<header class="landing-header">
+    <div class="container topbar">
+        <a class="brand" th:href="@{/}">EventApp</a>
+        <nav class="nav">
+            <a class="nav-link" th:href="@{/home}">Табло</a>
+            <a class="nav-link" th:href="@{/logout}">Изход</a>
+            <button id="themeToggle" class="icon-btn" aria-label="Превключи тема">🌓</button>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="hero slim-hero">
+        <div class="container hero-inner">
+            <div class="hero-badge">Моят профил</div>
+            <h1 class="hero-title" th:text="${user.username}">Потребител</h1>
+            <p class="hero-subtitle">Преглед на данните</p>
+            <div class="hero-actions"><a class="btn btn-primary" th:href="@{/profile/edit}">Редактиране</a></div>
+        </div>
+        <div class="hero-bg"></div>
+    </section>
+
+    <div class="container">
+        <div class="card">
+            <h2 class="mt-0">Информация</h2>
+            <div class="grid">
+                <article class="feature-card">
+                    <div class="meta">Имейл</div>
+                    <div th:text="${user.email}">email@example.com</div>
+                </article>
+                <article class="feature-card">
+                    <div class="meta">Име</div>
+                    <div th:text="${user.firstName} ?: '-'">-</div>
+                </article>
+                <article class="feature-card">
+                    <div class="meta">Фамилия</div>
+                    <div th:text="${user.lastName} ?: '-'">-</div>
+                </article>
+                <article class="feature-card">
+                    <div class="meta">Създаден</div>
+                    <div th:text="${#temporals.format(user.createdOn, 'dd.MM.yyyy HH:mm')}">--</div>
+                </article>
+                <article class="feature-card">
+                    <div class="meta">Обновен</div>
+                    <div th:text="${#temporals.format(user.updatedOn, 'dd.MM.yyyy HH:mm')}">--</div>
+                </article>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    (function theme(){
+        const btn = document.getElementById('themeToggle');
+        if(!btn) return;
+        const key = 'eventapp-theme';
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const saved = localStorage.getItem(key);
+        const apply = (m)=>{ document.documentElement.dataset.theme = m; localStorage.setItem(key,m); };
+        apply(saved || (prefersDark ? 'dark' : 'light'));
+        btn.addEventListener('click', ()=> apply(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
+    })();
+    // no extra animations here to keep it simple
+    </script>
+
+</body>
+</html>
+
+

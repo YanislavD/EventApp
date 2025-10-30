@@ -1,0 +1,4 @@
+package main.web.dto;
+
+public class LoginRequest {
+}
