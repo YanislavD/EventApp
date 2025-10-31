@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<html lang="bg" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -12,6 +12,7 @@
         <a class="brand" th:href="@{/}">EventApp</a>
         <nav class="nav">
             <a class="nav-link" th:href="@{/home}">Моите</a>
+            <a class="nav-link" th:href="@{/admin/categories}" sec:authorize="hasRole('ADMIN')">Категории</a>
             <a class="nav-link" th:href="@{/logout}">Изход</a>
         </nav>
     </div>
@@ -27,8 +28,73 @@
     </section>
 
     <div class="container">
-        <div class="card">
-            <p>Тук ще бъде списъкът със събития и бутон „Запиши се“.</p>
+        <div class="card card-success" th:if="${param.created}">
+            <strong>Успех!</strong> Събитието беше създадено успешно и вече е видимо за останалите потребители.
+        </div>
+
+        <div class="card card-success" th:if="${param.joined}">
+            <strong>Записан!</strong> Успешно се регистрира за събитието.
+        </div>
+
+        <div class="card card-info" th:if="${param.already}">
+            <strong>Внимание:</strong> Вече си записан за това събитие.
+        </div>
+
+        <div class="card card-error" th:if="${param.missing}">
+            <strong>Опа!</strong> Изглежда събитието, което избра, вече не съществува.
+        </div>
+
+        <div class="card card-error" th:if="${param.error}">
+            <strong>Не успя.</strong>
+            <span th:switch="${param.error[0]}">
+                <span th:case="'own'">Не можеш да се запишеш за собствено събитие.</span>
+                <span th:case="'full'">Няма свободни места за това събитие.</span>
+                <span th:case="*">Възникна неочаквано затруднение. Опитай отново.</span>
+            </span>
+        </div>
+
+        <div class="card card-muted" th:if="${#lists.isEmpty(events)}">
+            <h2 class="mt-0">Няма актуални събития</h2>
+            <p>В момента няма активни събития, организирани от други потребители.</p>
+            <a class="btn btn-primary" th:href="@{/events/create}">Създай първото</a>
+        </div>
+
+        <div class="grid events-grid" th:if="${!#lists.isEmpty(events)}">
+            <article class="feature-card event-card" th:each="event : ${events}">
+                <div class="event-card-header">
+                    <div>
+                        <h3 th:text="${event.name}">Име на събитие</h3>
+                        <p class="event-card-subtitle"
+                           th:text="${!#strings.isEmpty(event.creatorName) ? 'Организатор: ' + event.creatorName : 'Организатор неизвестен'}">Организатор</p>
+                    </div>
+                    <span class="badge badge-neutral" th:if="${!#strings.isEmpty(event.categoryName)}" th:text="${event.categoryName}">Категория</span>
+                </div>
+
+                <p class="event-card-description" th:text="${event.description}">Описание на събитието</p>
+
+                <div class="event-card-meta">
+                    <span>
+                        <strong>Начало:</strong>
+                        <span th:text="${event.startTime != null ? #temporals.format(event.startTime, 'dd.MM.yyyy HH:mm') : 'TBA'}">Дата</span>
+                    </span>
+                    <span th:if="${event.endTime != null}">
+                        <strong>Край:</strong>
+                        <span th:text="${#temporals.format(event.endTime, 'dd.MM.yyyy HH:mm')}">Край</span>
+                    </span>
+                    <span>
+                        <strong>Капацитет:</strong>
+                        <span th:text="${event.capacity != null ? event.capacity : 'Неограничен'}">Капацитет</span>
+                    </span>
+                </div>
+
+                <div class="event-card-actions">
+                    <span class="badge badge-success" th:if="${event.subscribed}">Вече си записан</span>
+                    <form th:if="${!event.subscribed}" th:action="@{'/events/' + ${event.id} + '/subscribe'}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <button type="submit" class="btn btn-primary">Запиши се</button>
+                    </form>
+                </div>
+            </article>
         </div>
     </div>
 </main>

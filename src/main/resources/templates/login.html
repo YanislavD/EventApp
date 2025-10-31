@@ -1,10 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Вход – EventApp</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
 </head>
-<body>
-$END$
+<body class="landing">
+<header class="landing-header">
+    <div class="container topbar">
+        <a class="brand" th:href="@{/}">EventApp</a>
+        <nav class="nav">
+            <a class="nav-link" th:href="@{/login}">Вход</a>
+            <a class="nav-cta" th:href="@{/register}">Регистрация</a>
+            <button id="themeToggle" class="icon-btn" aria-label="Превключи тема">🌓</button>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="hero slim-hero">
+        <div class="container hero-inner">
+            <h1 class="hero-title">Добре дошъл обратно</h1>
+            <p class="hero-subtitle">Влез, за да управляваш участията си и да откриваш нови събития.</p>
+        </div>
+        <div class="hero-bg"></div>
+    </section>
+
+    <div class="container">
+        <div class="card card-narrow">
+            <h2 class="mt-0">Вход</h2>
+            <form method="post" th:action="@{/login}" th:object="${loginRequest}">
+
+                <label for="email">Имейл</label>
+                <input id="email" name="email" type="email" th:field="*{email}" />
+
+                <label for="password">Парола</label>
+                <input id="password" name="password" type="password" minlength="6" th:field="*{password}" />
+
+                <button type="submit" class="btn-wide">Вход</button>
+
+                <p class="center mt-12">
+                    Нямаш акаунт? <a th:href="@{/register}" class="link">Регистрирай се</a>
+                </p>
+                <p class="error" id="loginError">Грешен имейл или парола.</p>
+            </form>
+        </div>
+    </div>
+</main>
+
+<script>
+    (function theme(){
+        const btn = document.getElementById('themeToggle');
+        if(!btn) return;
+        const key = 'eventapp-theme';
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const saved = localStorage.getItem(key);
+        const apply = (m)=>{ document.documentElement.dataset.theme = m; localStorage.setItem(key,m); };
+        apply(saved || (prefersDark ? 'dark' : 'light'));
+        btn.addEventListener('click', ()=> apply(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
+    })();
+</script>
 </body>
 </html>

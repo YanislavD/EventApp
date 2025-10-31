@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<html lang="bg" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -16,6 +16,7 @@
         <a class="brand" th:href="@{/}">EventApp</a>
         <nav class="nav">
             <a class="nav-link" th:href="@{/events}">Събития</a>
+            <a class="nav-link" th:href="@{/admin/categories}" sec:authorize="hasRole('ADMIN')">Категории</a>
             <a class="nav-link" th:href="@{/logout}">Изход</a>
             <button id="themeToggle" class="icon-btn" aria-label="Превключи тема">🌓</button>
         </nav>
@@ -31,12 +32,18 @@
             <div class="hero-actions">
                 <a class="btn btn-secondary" th:href="@{/profile}">Моят профил</a>
                 <a class="btn btn-primary" th:href="@{/events}">Открий събития</a>
+                <a class="btn btn-primary" th:href="@{/events/create}">Добави събитие</a>
+                <a class="btn btn-secondary" th:href="@{/admin/categories}" sec:authorize="hasRole('ADMIN')">Управлявай категории</a>
                 <a class="btn btn-secondary" th:href="@{/}">Към началото</a>
             </div>
 
             <div class="hero-stats">
                 <div class="stat reveal">
-                    <div class="stat-num" th:attr="data-target=${#lists.size(subscriptions)}">0</div>
+                    <div class="stat-num" th:text="${#lists.size(createdEvents)}">0</div>
+                    <div class="stat-label">организирани събития</div>
+                </div>
+                <div class="stat reveal">
+                    <div class="stat-num" th:text="${#lists.size(subscribedEvents)}">0</div>
                     <div class="stat-label">мои регистрации</div>
                 </div>
             </div>
@@ -46,16 +53,33 @@
 
     <div class="container">
         <div class="card">
-            <h2 class="mt-0 reveal">Моите регистрации</h2>
-            <div class="reveal" th:if="${#lists.isEmpty(subscriptions)}">Все още нямаш записи за събития.</div>
-            <div class="grid" th:if="${!#lists.isEmpty(subscriptions)}">
-                <article class="feature-card reveal" th:each="sub : ${subscriptions}">
-                    <h3 th:text="${sub.event.name}">Име на събитието</h3>
-                    <p th:text="${sub.event.description}">Кратко описание</p>
+            <h2 class="mt-0 reveal">Събития, които организираш</h2>
+            <div class="reveal" th:if="${#lists.isEmpty(createdEvents)}">Все още не си създал събитие. Започни с бутон „Добави събитие“.</div>
+            <div class="grid" th:if="${!#lists.isEmpty(createdEvents)}">
+                <article class="feature-card reveal" th:each="event : ${createdEvents}">
+                    <h3 th:text="${event.name}">Име на събитието</h3>
+                    <p th:text="${event.description}">Кратко описание</p>
                     <div class="meta">
-                        <span th:text="${#temporals.format(sub.event.startTime, 'dd.MM.yyyy HH:mm')}">Начало</span>
+                        <span th:text="${event.startTime != null ? #temporals.format(event.startTime, 'dd.MM.yyyy HH:mm') : 'Начална дата TBA'}">Начало</span>
+                        <span th:if="${!#strings.isEmpty(event.categoryName)}">Категория: <span th:text="${event.categoryName}">Категория</span></span>
+                        <span th:text="${event.capacity != null ? 'Капацитет: ' + event.capacity : 'Капацитет: неограничен'}">Капацитет</span>
                     </div>
-                    <a class="btn" th:href="@{'/events/' + ${sub.event.id}}">Детайли</a>
+                </article>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="mt-0 reveal">Събития, за които си записан</h2>
+            <div class="reveal" th:if="${#lists.isEmpty(subscribedEvents)}">Все още не си се записал за събитие. Разгледай наличните и се присъедини.</div>
+            <div class="grid" th:if="${!#lists.isEmpty(subscribedEvents)}">
+                <article class="feature-card reveal" th:each="event : ${subscribedEvents}">
+                    <h3 th:text="${event.name}">Име на събитието</h3>
+                    <p th:text="${event.description}">Кратко описание</p>
+                    <div class="meta">
+                        <span th:text="${event.startTime != null ? #temporals.format(event.startTime, 'dd.MM.yyyy HH:mm') : 'Начална дата TBA'}">Начало</span>
+                        <span th:if="${!#strings.isEmpty(event.categoryName)}">Категория: <span th:text="${event.categoryName}">Категория</span></span>
+                        <span th:if="${!#strings.isEmpty(event.creatorName)}">Организатор: <span th:text="${event.creatorName}">Организатор</span></span>
+                    </div>
                 </article>
             </div>
             <div class="reveal" style="margin-top:12px">

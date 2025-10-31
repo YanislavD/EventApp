@@ -1,10 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Регистрация – EventApp</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
 </head>
-<body>
-$END$
+<body class="landing">
+<header class="landing-header">
+    <div class="container topbar">
+        <a class="brand" th:href="@{/}">EventApp</a>
+        <nav class="nav">
+            <a class="nav-link" th:href="@{/login}">Вход</a>
+            <a class="nav-cta" th:href="@{/register}">Регистрация</a>
+            <button id="themeToggle" class="icon-btn" aria-label="Превключи тема">🌓</button>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="hero slim-hero">
+        <div class="container hero-inner">
+            <h1 class="hero-title">Създай своя профил</h1>
+            <p class="hero-subtitle">Присъедини се и започни да откриваш или организираш събития.</p>
+        </div>
+        <div class="hero-bg"></div>
+    </section>
+
+    <div class="container">
+        <div class="card card-wide">
+            <h2 class="mt-0">Регистрация</h2>
+            <form method="post" th:action="@{/register}" th:object="${registerRequest}">
+
+            <label for="username">
+                <span>Потребителско име</span>
+                <span class="badge-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Невалидно потребителско име</span>
+            </label>
+            <input id="username" th:field="*{username}" th:classappend="${#fields.hasErrors('username')} ? 'invalid'"/>
+
+            <label for="email">
+                <span>Имейл</span>
+                <span class="badge-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Невалиден имейл</span>
+            </label>
+            <input id="email" th:field="*{email}" type="email" th:classappend="${#fields.hasErrors('email')} ? 'invalid'"/>
+
+            <label for="password">
+                <span>Парола</span>
+                <span class="badge-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Невалидна парола</span>
+            </label>
+            <input id="password" th:field="*{password}" type="password" th:classappend="${#fields.hasErrors('password')} ? 'invalid'"/>
+
+            <button type="submit" class="btn-wide">Създай акаунт</button>
+
+            <p class="center mt-12">
+                Имаш акаунт? <a th:href="@{/login}" class="link">Влез</a>
+            </p>
+            </form>
+        </div>
+    </div>
+</main>
+
+<script>
+    (function theme(){
+        const btn = document.getElementById('themeToggle');
+        if(!btn) return;
+        const key = 'eventapp-theme';
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const saved = localStorage.getItem(key);
+        const apply = (m)=>{ document.documentElement.dataset.theme = m; localStorage.setItem(key,m); };
+        apply(saved || (prefersDark ? 'dark' : 'light'));
+        btn.addEventListener('click', ()=> apply(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
+    })();
+</script>
 </body>
 </html>

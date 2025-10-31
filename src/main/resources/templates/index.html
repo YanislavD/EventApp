@@ -1,10 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EventApp – Откривай и организирай събития</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
-$END$
+<body class="landing">
+<header class="landing-header">
+    <div class="container topbar">
+        <a class="brand" th:href="@{/}">EventApp</a>
+        <nav class="nav">
+            <a class="nav-link" th:href="@{/login}">Вход</a>
+            <a class="nav-cta" th:href="@{/register}">Регистрация</a>
+            <button id="themeToggle" class="icon-btn" aria-label="Превключи тема">🌓</button>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="hero">
+        <div class="container hero-inner">
+            <div class="hero-badge">Създавай. Откривай. Участвай.</div>
+            <h1 class="hero-title">Твоят център за събития</h1>
+            <p class="hero-subtitle">
+                EventApp помага да откриваш вдъхновяващи събития, да се включваш с един клик
+                и да организираш собствените си преживявания — лесно и интуитивно.
+            </p>
+            <div class="hero-actions">
+                <a class="btn btn-primary" th:href="@{/register}">Започни сега</a>
+                <a class="btn btn-secondary" th:href="@{/login}">Вече имаш профил?</a>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat reveal">
+                    <div class="stat-num" th:attr="data-target=${eventsCounter}">0</div>
+                    <div class="stat-label">+ организирани събития</div>
+                </div>
+                <div class="stat reveal">
+                    <div class="stat-num" th:attr="data-target=${usersCounter}">0</div>
+                    <div class="stat-label">+ участници</div>
+                </div>
+                <div class="stat reveal">
+                    <div class="stat-num" th:attr="data-target=${categoriesCounter}">0</div>
+                    <div class="stat-label">различни категории</div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-bg"></div>
+    </section>
+
+    <section class="features container">
+        <h2 class="section-title reveal">Какво получаваш</h2>
+        <div class="features-grid">
+            <article class="feature-card reveal">
+                <div class="feature-icon">🔍</div>
+                <h3>Откривай лесно</h3>
+                <p>Филтрирай по категория, дата и локация — намирай точно това, което те интересува.</p>
+            </article>
+            <article class="feature-card reveal">
+                <div class="feature-icon">⚡</div>
+                <h3>Включване с 1 клик</h3>
+                <p>Резервирай място мигновено и получавай напомняния директно на имейл.</p>
+            </article>
+            <article class="feature-card reveal">
+                <div class="feature-icon">🗓️</div>
+                <h3>Управлявай участията</h3>
+                <p>Следи любимите си събития и управлявай регистрациите си от един екран.</p>
+            </article>
+            <article class="feature-card reveal">
+                <div class="feature-icon">🧩</div>
+                <h3>Организирай събития</h3>
+                <p>Създавай свои събития, споделяй ги и посрещай участници без усилие.</p>
+            </article>
+        </div>
+        <div class="cta-center reveal">
+            <a class="btn btn-primary" th:href="@{/register}">Създай безплатен профил</a>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="container footer-text">
+        © 2025 EventApp
+    </div>
+</footer>
+
+<script>
+    // Тема (светла/тъмна) чрез CSS променливи и localStorage
+    (function theme() {
+        const btn = document.getElementById('themeToggle');
+        const key = 'eventapp-theme';
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const saved = localStorage.getItem(key);
+        const apply = (mode) => {
+            document.documentElement.dataset.theme = mode;
+            localStorage.setItem(key, mode);
+        };
+        apply(saved || (prefersDark ? 'dark' : 'light'));
+        btn.addEventListener('click', () => {
+            const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+            apply(next);
+        });
+    })();
+
+    // Reveal on scroll
+    const onReveal = (entries, observer) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.classList.add('revealed');
+                observer.unobserve(e.target);
+            }
+        });
+    };
+    const observer = new IntersectionObserver(onReveal, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Лек брояч на статистики
+    function animateCount(el) {
+        const target = Number(el.dataset.target || '0');
+        const duration = 1200;
+        const start = performance.now();
+        function tick(now) {
+            const p = Math.min(1, (now - start) / duration);
+            const val = Math.floor(target * (0.2 + 0.8 * p)); // ease-in-ish
+            el.textContent = val.toLocaleString('bg-BG');
+            if (p < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+    }
+    document.querySelectorAll('.stat-num').forEach(animateCount);
+</script>
 </body>
 </html>

@@ -1,9 +1,9 @@
 package main.controller;
 
-import main.model.Subscription;
 import main.model.User;
-import main.service.SubscriptionService;
+import main.service.EventService;
 import main.service.UserService;
+import main.web.view.EventView;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,12 +16,12 @@ import java.util.List;
 @Controller
 public class HomeController {
 
-    private final SubscriptionService subscriptionService;
     private final UserService userService;
+    private final EventService eventService;
 
-    public HomeController(SubscriptionService subscriptionService, UserService userService) {
+    public HomeController(EventService eventService, UserService userService) {
         this.userService = userService;
-        this.subscriptionService = subscriptionService;
+        this.eventService = eventService;
     }
 
     @GetMapping("/home")
@@ -29,9 +29,11 @@ public class HomeController {
         ModelAndView mv = new ModelAndView("home");
 
         User user = userService.getByEmail(principal.getName());
-        List<Subscription> subscriptions = subscriptionService.findByUserId(user.getId());
+        List<EventView> subscribedEvents = eventService.getSubscribedEvents(user.getId());
+        List<EventView> createdEvents = eventService.getCreatedEvents(user.getId());
 
-        mv.addObject("subscriptions", subscriptions);
+        mv.addObject("subscribedEvents", subscribedEvents);
+        mv.addObject("createdEvents", createdEvents);
         mv.addObject("user", user);
         return mv;
     }
@@ -62,9 +64,12 @@ public class HomeController {
     }
 
     @GetMapping("/events")
-    public ModelAndView events() {
-        // Simple placeholder page; subscribing handled elsewhere
-        return new ModelAndView("events");
+    public ModelAndView events(Principal principal) {
+        User user = userService.getByEmail(principal.getName());
+        ModelAndView mv = new ModelAndView("events");
+        mv.addObject("events", eventService.getEventsForListing(user.getId()));
+        mv.addObject("user", user);
+        return mv;
     }
 }
 
