@@ -29,12 +29,35 @@
             <div class="hero-badge reveal">Твоето табло</div>
             <h1 class="hero-title" th:text="${user != null ? 'Здравей, ' + user.username : 'Моят профил'}">Моят профил</h1>
             <p class="hero-subtitle">Твоите записани събития и предстоящи преживявания</p>
-            <div class="hero-actions">
-                <a class="btn btn-secondary" th:href="@{/profile}">Моят профил</a>
-                <a class="btn btn-primary" th:href="@{/events}">Открий събития</a>
-                <a class="btn btn-primary" th:href="@{/events/create}">Добави събитие</a>
-                <a class="btn btn-secondary" th:href="@{/admin/categories}" sec:authorize="hasRole('ADMIN')">Управлявай категории</a>
-                <a class="btn btn-secondary" th:href="@{/}">Към началото</a>
+            <div class="hero-actions hero-actions-grid">
+                <a class="action-card action-card-secondary reveal" th:href="@{/profile}">
+                    <span class="action-icon">👤</span>
+                    <div>
+                        <span class="action-title">Моят профил</span>
+                        <span class="action-text">Редактирай данните си и следи историята на участията.</span>
+                    </div>
+                </a>
+                <a class="action-card action-card-primary reveal" th:href="@{/events}">
+                    <span class="action-icon">🔍</span>
+                    <div>
+                        <span class="action-title">Открий събития</span>
+                        <span class="action-text">Разгледай какво предстои и се запиши само с един клик.</span>
+                    </div>
+                </a>
+                <a class="action-card action-card-primary reveal" th:href="@{/events/create}">
+                    <span class="action-icon">➕</span>
+                    <div>
+                        <span class="action-title">Добави събитие</span>
+                        <span class="action-text">Организирай собствено събитие и покани участници.</span>
+                    </div>
+                </a>
+                <a class="action-card action-card-secondary reveal" th:href="@{/admin/categories}" sec:authorize="hasRole('ADMIN')">
+                    <span class="action-icon">🗂️</span>
+                    <div>
+                        <span class="action-title">Управлявай категории</span>
+                        <span class="action-text">Организирай каталога от категории за цялата платформа.</span>
+                    </div>
+                </a>
             </div>
 
             <div class="hero-stats">
@@ -51,7 +74,7 @@
         <div class="hero-bg"></div>
     </section>
 
-    <div class="container">
+    <div class="container home-sections">
         <div class="card">
             <h2 class="mt-0 reveal">Събития, които организираш</h2>
             <div class="reveal" th:if="${#lists.isEmpty(createdEvents)}">Все още не си създал събитие. Започни с бутон „Добави събитие“.</div>
@@ -88,6 +111,8 @@
         </div>
     </div>
 </main>
+
+<th:block th:replace="~{fragments/footer :: siteFooter}"></th:block>
 
 <script>
     (function theme(){

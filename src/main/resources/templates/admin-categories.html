@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Управление на категории – EventApp</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body class="landing">
+<header class="landing-header">
+    <div class="container topbar">
+        <a class="brand" th:href="@{/}">EventApp</a>
+        <nav class="nav">
+            <a class="nav-link" th:href="@{/home}">Табло</a>
+            <a class="nav-link" th:href="@{/events}">Събития</a>
+            <a class="nav-link" th:href="@{/events/create}">Ново събитие</a>
+            <a class="nav-link" th:href="@{/logout}">Изход</a>
+            <button id="themeToggle" class="icon-btn" aria-label="Превключи тема">🌓</button>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="hero slim-hero">
+        <div class="container hero-inner">
+            <h1 class="hero-title">Управление на категории</h1>
+            <p class="hero-subtitle">Добавяй и подреждай категориите, които потребителите могат да използват при създаване на събитие.</p>
+        </div>
+        <div class="hero-bg"></div>
+    </section>
+
+    <div class="container">
+        <div class="card" th:if="${param.created}">
+            <strong>Готово!</strong> Категорията беше добавена успешно.
+        </div>
+
+        <div class="card card-wide form-card">
+            <div class="form-headline">
+                <span class="form-badge">⚙️ Админ панел</span>
+                <h2>Нова категория</h2>
+                <p>Поддържай каталога свеж – имената трябва да са ясни и разбираеми за всички участници.</p>
+            </div>
+
+            <form class="form" th:action="@{/admin/categories}" th:object="${categoryCreateRequest}" method="post">
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <span class="form-section-icon">🏷️</span>
+                        <div>
+                            <h3>Име на категорията</h3>
+                            <p>Използвай до 64 символа, без специални знаци. Например „Технологии“, „Изкуство“, „Обучения“.</p>
+                        </div>
+                    </div>
+
+                    <div class="field field-inline">
+                        <div class="field-header">
+                            <label for="name">Име</label>
+                            <span class="badge-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Въведи име на категорията</span>
+                        </div>
+                        <input id="name" th:field="*{name}" placeholder="Пример: Уеб разработки" />
+                        <p class="field-hint">Ще се показва в падащото меню при създаване на събитие.</p>
+                    </div>
+                </div>
+
+                <div class="form-footer">
+                    <div class="form-meta">
+                        <span class="form-meta-icon">ℹ️</span>
+                        <div>
+                            <strong>Съвет:</strong>
+                            <p>Преди да добавиш нова категория, провери дали не съществува подобно име.</p>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Добави категория</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+            <h2 class="mt-0">Всички категории</h2>
+            <div th:if="${#lists.isEmpty(categories)}">
+                Все още няма категории. Добави първата от формата по-горе.
+            </div>
+            <div class="grid" th:if="${!#lists.isEmpty(categories)}">
+                <article class="feature-card" th:each="category : ${categories}">
+                    <h3 th:text="${category.name}">Име на категория</h3>
+                    <div class="meta">ID: <span th:text="${category.id}">...</span></div>
+                </article>
+            </div>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/footer :: siteFooter}"></th:block>
+
+<script>
+    (function theme(){
+        const btn = document.getElementById('themeToggle');
+        if(!btn) return;
+        const key = 'eventapp-theme';
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const saved = localStorage.getItem(key);
+        const apply = (m)=>{ document.documentElement.dataset.theme = m; localStorage.setItem(key,m); };
+        apply(saved || (prefersDark ? 'dark' : 'light'));
+        btn.addEventListener('click', ()=> apply(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
+    })();
+</script>
+</body>
+</html>
+

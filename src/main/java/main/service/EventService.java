@@ -34,6 +34,10 @@ public class EventService {
         return eventRepository.count();
     }
 
+    public List<Category> getAvailableCategories() {
+        return categoryService.getAll();
+    }
+
     public long getDistinctCategoryCount() {
         return eventRepository.countDistinctCategories();
     }
@@ -64,11 +68,13 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    public List<EventView> getEventsForListing(UUID userId) {
+    public List<EventView> getEventsForListing(UUID userId, Sort sort, UUID categoryFilter) {
         Set<UUID> subscribedEventIds = subscriptionService.getSubscribedEventIds(userId);
+        Sort effectiveSort = (sort != null) ? sort : Sort.by(Sort.Direction.ASC, "startTime");
 
-        return eventRepository.findAll(Sort.by(Sort.Direction.ASC, "startTime")).stream()
+        return eventRepository.findAll(effectiveSort).stream()
                 .filter(event -> event.getCreator() == null || !event.getCreator().getId().equals(userId))
+                .filter(event -> categoryFilter == null || (event.getCategory() != null && categoryFilter.equals(event.getCategory().getId())))
                 .map(event -> toView(event, subscribedEventIds.contains(event.getId())))
                 .toList();
     }
@@ -117,6 +123,9 @@ public class EventService {
         User creator = event.getCreator();
         UUID creatorId = creator != null ? creator.getId() : null;
         String creatorName = creator != null ? creator.getUsername() : "";
+        long registeredCount = subscriptionService.countByEvent(event.getId());
+        long remaining = event.getCapacity() != null ? Math.max(0, event.getCapacity() - registeredCount) : Long.MAX_VALUE;
+        boolean full = event.getCapacity() != null && remaining <= 0;
 
         return new EventView(
                 event.getId(),
@@ -125,6 +134,9 @@ public class EventService {
                 event.getStartTime(),
                 event.getEndTime(),
                 event.getCapacity(),
+                remaining,
+                registeredCount,
+                full,
                 categoryName,
                 creatorId,
                 creatorName,

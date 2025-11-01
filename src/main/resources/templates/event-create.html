@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Създай събитие – EventApp</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body class="landing">
+<header class="landing-header">
+    <div class="container topbar">
+        <a class="brand" th:href="@{/}">EventApp</a>
+        <nav class="nav">
+            <a class="nav-link" th:href="@{/home}">Табло</a>
+            <a class="nav-link" th:href="@{/events}">Всички събития</a>
+            <a class="nav-link" th:href="@{/admin/categories}" sec:authorize="hasRole('ADMIN')">Категории</a>
+            <a class="nav-link" th:href="@{/logout}">Изход</a>
+            <button id="themeToggle" class="icon-btn" aria-label="Превключи тема">🌓</button>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="hero slim-hero">
+        <div class="container hero-inner">
+            <h1 class="hero-title">Добави ново събитие</h1>
+            <p class="hero-subtitle">Попълни детайлите и публикувай своето събитие.</p>
+        </div>
+        <div class="hero-bg"></div>
+    </section>
+
+    <div class="container">
+        <div class="card card-wide form-card">
+            <div class="form-headline">
+                <span class="form-badge">🎟️ Създай събитие</span>
+                <h2>Подготви детайлите</h2>
+                <p>Опиши ключовата информация, за да изглежда твоето събитие професионално и привлекателно.</p>
+            </div>
+
+            <form class="form" th:action="@{/events/create}" th:object="${eventCreateRequest}" method="post">
+
+                <section class="form-section">
+                    <div class="form-section-header">
+                        <span class="form-section-icon">📝</span>
+                        <div>
+                            <h3>Основна информация</h3>
+                            <p>Въведи кратко и запомнящо се описание, което ще събуди интереса на участниците.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-grid form-grid--two">
+                        <div class="field">
+                            <div class="field-header">
+                                <label for="name">Име на събитието</label>
+                                <span class="badge-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Въведи име</span>
+                            </div>
+                            <input id="name" th:field="*{name}" placeholder="Пример: Технологичен форум 2025" th:classappend="${#fields.hasErrors('name')} ? 'invalid'" />
+                            <p class="field-hint">Създай запомнящо се заглавие – един ред, който ясно казва за кого е събитието.</p>
+                        </div>
+
+                        <div class="field">
+                            <div class="field-header">
+                                <label for="categoryId">Категория</label>
+                                <span class="badge-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}">Избери категория</span>
+                            </div>
+                            <select id="categoryId" th:field="*{categoryId}" th:classappend="${#fields.hasErrors('categoryId')} ? 'invalid'">
+                                <option value="" disabled th:selected="${eventCreateRequest.categoryId} == null">Избери категория</option>
+                                <option th:each="category : ${categories}"
+                                        th:value="${category.id}"
+                                        th:text="${category.name}"></option>
+                            </select>
+                            <p class="field-hint">
+                                Избери най-подходящата категория, за да откриват участниците по-лесно събитието.
+                            </p>
+                        </div>
+                        <div class="field field-wide">
+                            <div class="field-header">
+                                <label for="description">Описание</label>
+                                <span class="badge-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Добави описание</span>
+                            </div>
+                            <textarea id="description" rows="5" th:field="*{description}" placeholder="Разкажи накратко какво предстои, кои са акцентите и защо не трябва да се пропуска." th:classappend="${#fields.hasErrors('description')} ? 'invalid'"></textarea>
+                            <p class="field-hint">Сподели ключовите акценти, гост-лекторите или специалните активности – до 3-4 изречения.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="form-section-header">
+                        <span class="form-section-icon">⏱️</span>
+                        <div>
+                            <h3>График</h3>
+                            <p>Определи периода, за да могат гостите да планират участието си.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-grid form-grid--two">
+                        <div class="field">
+                            <div class="field-header">
+                                <label for="startTime">Начало</label>
+                                <span class="badge-error" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}">Началото е задължително</span>
+                            </div>
+                            <input id="startTime" type="datetime-local" th:field="*{startTime}" th:classappend="${#fields.hasErrors('startTime')} ? 'invalid'" />
+                            <p class="field-hint">Дата и час за старта – участниците ще получат напомняне според него.</p>
+                        </div>
+
+                        <div class="field">
+                            <div class="field-header">
+                                <label for="endTime">Край</label>
+                                <span class="badge-error" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}">Краят е задължителен</span>
+                            </div>
+                            <input id="endTime" type="datetime-local" th:field="*{endTime}" th:classappend="${#fields.hasErrors('endTime')} ? 'invalid'" />
+                            <p class="field-hint">Планирай финала – важно е за ангажимента и логистиката на събитието.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="form-section-header">
+                        <span class="form-section-icon">👥</span>
+                        <div>
+                            <h3>Достъп & капацитет</h3>
+                            <p>Контролирай броя участници, за да осигуриш комфортно преживяване.</p>
+                        </div>
+                    </div>
+
+                    <div class="field field-inline">
+                        <div class="field-header">
+                            <label for="capacity">Капацитет</label>
+                            <span class="badge-error" th:if="${#fields.hasErrors('capacity')}" th:errors="*{capacity}">Въведи капацитет</span>
+                        </div>
+                        <input id="capacity" type="number" min="1" step="1" th:field="*{capacity}" th:classappend="${#fields.hasErrors('capacity')} ? 'invalid'" />
+                        <p class="field-hint">Определи максималния брой места – можеш да го актуализираш и по-късно.</p>
+                    </div>
+                </section>
+
+                <div class="form-divider"></div>
+
+                <div class="form-footer">
+                    <div class="form-meta">
+                        <span class="form-meta-icon">💡</span>
+                        <div>
+                            <strong>Съвет:</strong>
+                            <p>Провери още веднъж детайлите – всеки записан участник ще получи информацията точно както е тук.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a class="btn btn-secondary" th:href="@{/home}">Отказ</a>
+                        <button type="submit" class="btn btn-primary">Създай събитие</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/footer :: siteFooter}"></th:block>
+
+<script>
+    (function theme(){
+        const btn = document.getElementById('themeToggle');
+        if(!btn) return;
+        const key = 'eventapp-theme';
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const saved = localStorage.getItem(key);
+        const apply = (m)=>{ document.documentElement.dataset.theme = m; localStorage.setItem(key,m); };
+        apply(saved || (prefersDark ? 'dark' : 'light'));
+        btn.addEventListener('click', ()=> apply(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
+    })();
+</script>
+</body>
+</html>
+

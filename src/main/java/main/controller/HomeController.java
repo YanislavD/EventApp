@@ -12,6 +12,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.UUID;
+import org.springframework.data.domain.Sort;
 
 @Controller
 public class HomeController {
@@ -64,12 +66,32 @@ public class HomeController {
     }
 
     @GetMapping("/events")
-    public ModelAndView events(Principal principal) {
+    public ModelAndView events(@RequestParam(value = "sort", required = false) String sortParam,
+                               @RequestParam(value = "category", required = false) UUID categoryId,
+                               Principal principal) {
         User user = userService.getByEmail(principal.getName());
+        Sort sort = resolveSort(sortParam);
+
         ModelAndView mv = new ModelAndView("events");
-        mv.addObject("events", eventService.getEventsForListing(user.getId()));
+        mv.addObject("events", eventService.getEventsForListing(user.getId(), sort, categoryId));
+        mv.addObject("selectedSort", sortParam);
+        mv.addObject("selectedCategory", categoryId);
         mv.addObject("user", user);
+        mv.addObject("categories", eventService.getAvailableCategories());
         return mv;
+    }
+
+    private Sort resolveSort(String sortParam) {
+        if ("startDesc".equalsIgnoreCase(sortParam)) {
+            return Sort.by(Sort.Direction.DESC, "startTime");
+        }
+        if ("categoryAsc".equalsIgnoreCase(sortParam)) {
+            return Sort.by(Sort.Direction.ASC, "category.name").and(Sort.by(Sort.Direction.ASC, "startTime"));
+        }
+        if ("categoryDesc".equalsIgnoreCase(sortParam)) {
+            return Sort.by(Sort.Direction.DESC, "category.name").and(Sort.by(Sort.Direction.ASC, "startTime"));
+        }
+        return Sort.by(Sort.Direction.ASC, "startTime");
     }
 }
 

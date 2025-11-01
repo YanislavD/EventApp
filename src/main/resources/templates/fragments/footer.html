@@ -1,0 +1,5 @@
+<footer xmlns:th="http://www.thymeleaf.org" th:fragment="siteFooter">
+    <div class="container footer-text">
+        © <span th:text="${#calendars.format(#calendars.createNow(), 'yyyy')}">2025</span> EventApp
+    </div>
+</footer>
