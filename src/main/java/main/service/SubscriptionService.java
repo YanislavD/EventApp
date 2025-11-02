@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -64,5 +65,18 @@ public class SubscriptionService {
                 .build();
         Subscription saved = subscriptionRepository.save(subscription);
         return Objects.requireNonNull(saved, "Регистрацията не беше запазена");
+    }
+
+    public boolean deleteByUserAndEvent(UUID userId, UUID eventId) {
+        Optional<Subscription> subscription = subscriptionRepository.findByUserIdAndEventId(userId, eventId);
+        if (subscription.isEmpty()) {
+            return false;
+        }
+        subscription.ifPresent(subscriptionRepository::delete);
+        return true;
+    }
+
+    public void deleteAllByEventId(UUID eventId) {
+        subscriptionRepository.findByEventId(eventId).forEach(subscriptionRepository::delete);
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -56,5 +57,35 @@ public class UserService {
 
     public User getByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    public List<User> getAll() {
+        return userRepository.findAll();
+    }
+
+    public User getById(UUID id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Потребителят не е намерен"));
+    }
+
+    @Transactional
+    public void updateRole(UUID userId, Role newRole) {
+        if (userId == null) {
+            throw new IllegalArgumentException("Идентификаторът на потребителя е задължителен");
+        }
+        if (newRole == null) {
+            throw new IllegalArgumentException("Ролята е задължителна");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Потребителят не е намерен"));
+
+        if (user.getRole() == newRole) {
+            throw new IllegalStateException("Потребителят вече има тази роля");
+        }
+
+        user.setRole(newRole);
+        user.setUpdatedOn(LocalDateTime.now());
+        userRepository.save(user);
     }
 }

@@ -17,4 +17,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
     boolean existsByUserIdAndEventId(UUID userId, UUID eventId);
 
     long countByEventId(UUID eventId);
+
+    List<Subscription> findByEventId(UUID eventId);
 }

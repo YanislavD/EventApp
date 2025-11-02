@@ -17,6 +17,7 @@
         <nav class="nav">
             <a class="nav-link" th:href="@{/events}">Събития</a>
             <a class="nav-link" th:href="@{/admin/categories}" sec:authorize="hasRole('ADMIN')">Категории</a>
+            <a class="nav-link" th:href="@{/admin/users}" sec:authorize="hasRole('ADMIN')">Потребители</a>
             <a class="nav-link" th:href="@{/logout}">Изход</a>
             <button id="themeToggle" class="icon-btn" aria-label="Превключи тема">🌓</button>
         </nav>
@@ -58,6 +59,13 @@
                         <span class="action-text">Организирай каталога от категории за цялата платформа.</span>
                     </div>
                 </a>
+                <a class="action-card action-card-secondary reveal" th:href="@{/admin/users}" sec:authorize="hasRole('ADMIN')">
+                    <span class="action-icon">👥</span>
+                    <div>
+                        <span class="action-title">Управлявай потребители</span>
+                        <span class="action-text">Преглеждай и управлявай ролите на потребителите в системата.</span>
+                    </div>
+                </a>
             </div>
 
             <div class="hero-stats">
@@ -77,15 +85,50 @@
     <div class="container home-sections">
         <div class="card">
             <h2 class="mt-0 reveal">Събития, които организираш</h2>
-            <div class="reveal" th:if="${#lists.isEmpty(createdEvents)}">Все още не си създал събитие. Започни с бутон „Добави събитие“.</div>
+            <div class="reveal" th:if="${param.updated}">
+                <div class="alert alert-success" style="margin-bottom: 16px;">
+                    <strong>Успех!</strong> Събитието беше обновено успешно.
+                </div>
+            </div>
+            <div class="reveal" th:if="${param.deleted}">
+                <div class="alert alert-success" style="margin-bottom: 16px;">
+                    <strong>Успех!</strong> Събитието беше изтрито успешно.
+                </div>
+            </div>
+            <div class="reveal" th:if="${param.error == 'unauthorized'}">
+                <div class="alert alert-error" style="margin-bottom: 16px;">
+                    <strong>Грешка:</strong> Нямаш право да редактираш/изтриваш това събитие.
+                </div>
+            </div>
+            <div class="reveal" th:if="${param.error == 'notFound'}">
+                <div class="alert alert-error" style="margin-bottom: 16px;">
+                    <strong>Грешка:</strong> Събитието не е намерено.
+                </div>
+            </div>
+            <div class="reveal" th:if="${#lists.isEmpty(createdEvents)}">Все още не си създал събитие. Започни с бутон „Добави събитие".</div>
             <div class="grid" th:if="${!#lists.isEmpty(createdEvents)}">
                 <article class="feature-card reveal" th:each="event : ${createdEvents}">
-                    <h3 th:text="${event.name}">Име на събитието</h3>
-                    <p th:text="${event.description}">Кратко описание</p>
-                    <div class="meta">
-                        <span th:text="${event.startTime != null ? #temporals.format(event.startTime, 'dd.MM.yyyy HH:mm') : 'Начална дата TBA'}">Начало</span>
-                        <span th:if="${!#strings.isEmpty(event.categoryName)}">Категория: <span th:text="${event.categoryName}">Категория</span></span>
-                        <span th:text="${event.capacity != null ? 'Капацитет: ' + event.capacity : 'Капацитет: неограничен'}">Капацитет</span>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0 0 8px 0;" th:text="${event.name}">Име на събитието</h3>
+                            <p style="margin: 0 0 12px 0;" th:text="${event.description}">Кратко описание</p>
+                            <div class="meta">
+                                <span th:text="${event.startTime != null ? #temporals.format(event.startTime, 'dd.MM.yyyy HH:mm') : 'Начална дата TBA'}">Начало</span>
+                                <span th:if="${!#strings.isEmpty(event.categoryName)}">Категория: <span th:text="${event.categoryName}">Категория</span></span>
+                                <span th:text="${event.capacity != null ? 'Капацитет: ' + event.capacity : 'Капацитет: неограничен'}">Капацитет</span>
+                            </div>
+                        </div>
+                        <div style="flex-shrink: 0; display: flex; gap: 8px; flex-wrap: wrap;">
+                            <a th:href="@{/events/{eventId}/edit(eventId=${event.id})}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.875em; white-space: nowrap; text-decoration: none;">
+                                Редактирай
+                            </a>
+                            <form th:action="@{/events/{eventId}/delete(eventId=${event.id})}" method="post" style="margin: 0; display: inline;">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button type="submit" class="btn" style="padding: 8px 16px; font-size: 0.875em; white-space: nowrap; background: #dc3545; color: #fff; border: none; cursor: pointer;" onclick="return confirm('Сигурен ли си, че искаш да изтриеш това събитие? Това действие е необратимо.');">
+                                    Изтрий
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </article>
             </div>
@@ -93,15 +136,42 @@
 
         <div class="card">
             <h2 class="mt-0 reveal">Събития, за които си записан</h2>
+            <div class="reveal" th:if="${param.unsubscribed}">
+                <div class="alert alert-success" style="margin-bottom: 16px;">
+                    <strong>Успех!</strong> Успешно се отписахте от събитието.
+                </div>
+            </div>
+            <div class="reveal" th:if="${param.notSubscribed}">
+                <div class="alert alert-info" style="margin-bottom: 16px;">
+                    <strong>Информация:</strong> Не сте записани за това събитие.
+                </div>
+            </div>
+            <div class="reveal" th:if="${param.missing}">
+                <div class="alert alert-error" style="margin-bottom: 16px;">
+                    <strong>Грешка:</strong> Събитието не е намерено.
+                </div>
+            </div>
             <div class="reveal" th:if="${#lists.isEmpty(subscribedEvents)}">Все още не си се записал за събитие. Разгледай наличните и се присъедини.</div>
             <div class="grid" th:if="${!#lists.isEmpty(subscribedEvents)}">
                 <article class="feature-card reveal" th:each="event : ${subscribedEvents}">
-                    <h3 th:text="${event.name}">Име на събитието</h3>
-                    <p th:text="${event.description}">Кратко описание</p>
-                    <div class="meta">
-                        <span th:text="${event.startTime != null ? #temporals.format(event.startTime, 'dd.MM.yyyy HH:mm') : 'Начална дата TBA'}">Начало</span>
-                        <span th:if="${!#strings.isEmpty(event.categoryName)}">Категория: <span th:text="${event.categoryName}">Категория</span></span>
-                        <span th:if="${!#strings.isEmpty(event.creatorName)}">Организатор: <span th:text="${event.creatorName}">Организатор</span></span>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0 0 8px 0;" th:text="${event.name}">Име на събитието</h3>
+                            <p style="margin: 0 0 12px 0;" th:text="${event.description}">Кратко описание</p>
+                            <div class="meta">
+                                <span th:text="${event.startTime != null ? #temporals.format(event.startTime, 'dd.MM.yyyy HH:mm') : 'Начална дата TBA'}">Начало</span>
+                                <span th:if="${!#strings.isEmpty(event.categoryName)}">Категория: <span th:text="${event.categoryName}">Категория</span></span>
+                                <span th:if="${!#strings.isEmpty(event.creatorName)}">Организатор: <span th:text="${event.creatorName}">Организатор</span></span>
+                            </div>
+                        </div>
+                        <div style="flex-shrink: 0;">
+                            <form th:action="@{'/events/' + ${event.id} + '/unsubscribe'}" method="post" style="margin: 0;">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button type="submit" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.875em; white-space: nowrap;">
+                                    Отпиши се
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </article>
             </div>

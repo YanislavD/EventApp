@@ -12,6 +12,8 @@
         <a class="brand" th:href="@{/}">EventApp</a>
         <nav class="nav">
             <a class="nav-link" th:href="@{/home}">Табло</a>
+            <a class="nav-link" th:href="@{/admin/categories}" sec:authorize="hasRole('ADMIN')">Категории</a>
+            <a class="nav-link" th:href="@{/admin/users}" sec:authorize="hasRole('ADMIN')">Потребители</a>
             <a class="nav-link" th:href="@{/logout}">Изход</a>
             <button id="themeToggle" class="icon-btn" aria-label="Превключи тема">🌓</button>
         </nav>

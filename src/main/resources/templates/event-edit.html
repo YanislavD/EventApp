@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Създай събитие – EventApp</title>
+    <title>Редактирай събитие – EventApp</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
 </head>
 <body class="landing">
@@ -24,21 +24,26 @@
 <main>
     <section class="hero slim-hero">
         <div class="container hero-inner">
-            <h1 class="hero-title">Добави ново събитие</h1>
-            <p class="hero-subtitle">Попълни детайлите и публикувай своето събитие.</p>
+            <h1 class="hero-title">Редактирай събитие</h1>
+            <p class="hero-subtitle">Актуализирай детайлите на своето събитие.</p>
         </div>
         <div class="hero-bg"></div>
     </section>
 
     <div class="container">
+        <div class="card" th:if="${error}">
+            <strong>Грешка:</strong> <span th:text="${error}">Неочаквана грешка</span>
+        </div>
+
         <div class="card card-wide form-card">
             <div class="form-headline">
-                <span class="form-badge">🎟️ Създай събитие</span>
+                <span class="form-badge">✏️ Редактирай събитие</span>
                 <h2>Подготви детайлите</h2>
                 <p>Опиши ключовата информация, за да изглежда твоето събитие професионално и привлекателно.</p>
             </div>
 
-            <form class="form" th:action="@{/events/create}" th:object="${eventCreateRequest}" method="post">
+            <form class="form" th:action="@{/events/{eventId}/edit(eventId=${eventId})}" th:object="${eventCreateRequest}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
                 <section class="form-section">
                     <div class="form-section-header">
@@ -65,10 +70,11 @@
                                 <span class="badge-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}">Избери категория</span>
                             </div>
                             <select id="categoryId" th:field="*{categoryId}" th:classappend="${#fields.hasErrors('categoryId')} ? 'invalid'">
-                                <option value="" disabled th:selected="${eventCreateRequest.categoryId} == null">Избери категория</option>
+                                <option value="" disabled>Избери категория</option>
                                 <option th:each="category : ${categories}"
                                         th:value="${category.id}"
-                                        th:text="${category.name}"></option>
+                                        th:text="${category.name}"
+                                        th:selected="${eventCreateRequest.categoryId != null and eventCreateRequest.categoryId.equals(category.id)}"></option>
                             </select>
                             <p class="field-hint">
                                 Избери най-подходящата категория, за да откриват участниците по-лесно събитието.
@@ -147,7 +153,7 @@
 
                     <div class="form-actions">
                         <a class="btn btn-secondary" th:href="@{/home}">Отказ</a>
-                        <button type="submit" class="btn btn-primary">Създай събитие</button>
+                        <button type="submit" class="btn btn-primary">Запази промените</button>
                     </div>
                 </div>
             </form>
