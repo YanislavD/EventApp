@@ -3,6 +3,7 @@ package main.controller;
 import main.model.Role;
 import main.model.User;
 import main.service.UserService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,7 +37,8 @@ public class AdminUserController {
 
     @PostMapping("/{userId}/role")
     public ModelAndView changeUserRole(@PathVariable UUID userId,
-                                       @RequestParam String role) {
+                                       @RequestParam String role,
+                                       Principal principal) {
         try {
             Role newRole;
             try {
@@ -44,7 +47,17 @@ public class AdminUserController {
                 return new ModelAndView("redirect:/admin/users?error=invalidRole");
             }
 
+            User currentUser = userService.getByEmail(principal.getName());
+            boolean changingOwnRole = currentUser.getId().equals(userId);
+
             userService.updateRole(userId, newRole);
+
+            // Ако потребителят променя собствената си роля, инвалидираме сесията
+            if (changingOwnRole) {
+                SecurityContextHolder.clearContext();
+                return new ModelAndView("redirect:/logout");
+            }
+
             return new ModelAndView("redirect:/admin/users?success=roleChanged");
         } catch (IllegalArgumentException ex) {
             return new ModelAndView("redirect:/admin/users?error=notFound");

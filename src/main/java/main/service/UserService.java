@@ -6,6 +6,8 @@ import main.model.Role;
 import main.model.User;
 import main.repository.UserRepository;
 import main.web.dto.RegisterRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,8 @@ import java.util.UUID;
 
 @Service
 public class UserService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -87,5 +91,6 @@ public class UserService {
         user.setRole(newRole);
         user.setUpdatedOn(LocalDateTime.now());
         userRepository.save(user);
+        logger.info("User role updated: {} to role {}", user.getEmail(), newRole.name());
     }
 }

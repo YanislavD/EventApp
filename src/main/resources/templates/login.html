@@ -32,18 +32,27 @@
             <h2 class="mt-0">Вход</h2>
             <form method="post" th:action="@{/login}" th:object="${loginRequest}">
 
-                <label for="email">Имейл</label>
-                <input id="email" name="email" type="email" th:field="*{email}" />
+                <div th:if="${param.error}" style="margin-bottom: 1rem;">
+                    <span class="badge-error" style="display: block; padding: 0.75rem; margin-bottom: 0.5rem;">Невалиден имейл или парола.</span>
+                </div>
 
-                <label for="password">Парола</label>
-                <input id="password" name="password" type="password" minlength="6" th:field="*{password}" />
+                <label for="email">
+                    <span>Имейл</span>
+                    <span class="badge-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Невалиден имейл</span>
+                </label>
+                <input id="email" name="email" type="email" th:field="*{email}" th:classappend="${#fields.hasErrors('email')} ? 'invalid'" />
+
+                <label for="password">
+                    <span>Парола</span>
+                    <span class="badge-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Невалидна парола</span>
+                </label>
+                <input id="password" name="password" type="password" minlength="6" th:field="*{password}" th:classappend="${#fields.hasErrors('password')} ? 'invalid'" />
 
                 <button type="submit" class="btn-wide">Вход</button>
 
                 <p class="center mt-12">
                     Нямаш акаунт? <a th:href="@{/register}" class="link">Регистрирай се</a>
                 </p>
-                <p class="error" id="loginError">Грешен имейл или парола.</p>
             </form>
         </div>
     </div>

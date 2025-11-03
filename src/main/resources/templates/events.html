@@ -76,6 +76,16 @@
                 </div>
             </div>
 
+            <div style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(79, 70, 229, 0.02) 100%); border: 1px solid rgba(79, 70, 229, 0.1); border-radius: 12px; padding: 16px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px;">
+                <span style="font-size: 24px; flex-shrink: 0;">💡</span>
+                <div style="flex: 1;">
+                    <div style="font-weight: 700; font-size: 14px; margin-bottom: 6px; color: #4f46e5;">Полезен съвет</div>
+                    <div style="color: var(--muted); font-size: 13px; line-height: 1.6;">
+                        Използвай филтрите по-долу, за да откриеш точно това, което търсиш. Сортирай по дата или категория и филтрирай според твоите интереси.
+                    </div>
+                </div>
+            </div>
+
             <form class="panel-filters" method="get">
                 <div class="filter-group">
                     <label for="sort">Сортирай по</label>
@@ -108,9 +118,20 @@
 
             <div class="events-empty" th:if="${#lists.isEmpty(events)}">
                 <div class="events-empty-content">
-                    <h3>Няма налични събития</h3>
-                    <p>Все още никой не е организирал събитие. Бъди първият и създай ново преживяване.</p>
+                    <div style="font-size: 64px; margin-bottom: 24px;">📅</div>
+                    <h3 style="margin-bottom: 12px;">Няма налични събития</h3>
+                    <p style="margin-bottom: 24px; color: var(--muted);">Все още никой не е организирал събитие. Бъди първият и създай ново преживяване.</p>
                     <a class="btn btn-primary" th:href="@{/events/create}">Създай първото събитие</a>
+                    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <div>
+                            <div style="font-weight: 700; margin-bottom: 8px; font-size: 14px;">💡 Съвет</div>
+                            <p style="margin: 0; font-size: 13px; color: var(--muted); line-height: 1.6;">Създай интересно събитие с ясно описание и актуална категория, за да привлечеш участници.</p>
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; margin-bottom: 8px; font-size: 14px;">⚡ Бърза помощ</div>
+                            <p style="margin: 0; font-size: 13px; color: var(--muted); line-height: 1.6;">Ако искаш да разгледаш своята страница, <a th:href="@{/home}" style="color: #4f46e5; text-decoration: none;">отиди в таблото си</a>.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -157,11 +178,12 @@
                                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                     <button type="submit" class="btn btn-secondary" style="font-size: 0.9em; padding: 8px 16px;">Отпиши се</button>
                                 </form>
-                                <span class="badge badge-neutral" th:if="${event.full && !event.subscribed}">Събитието е запълнено</span>
-                                <form th:if="${!event.subscribed && !event.full}" th:action="@{'/events/' + ${event.id} + '/subscribe'}" method="post" style="display: inline;">
+                                <span class="badge badge-neutral" th:if="${event.full && !event.subscribed && (event.creatorId == null or user == null or !event.creatorId.equals(user.id))}">Събитието е запълнено</span>
+                                <form th:if="${!event.subscribed && !event.full && (event.creatorId == null or user == null or !event.creatorId.equals(user.id))}" th:action="@{'/events/' + ${event.id} + '/subscribe'}" method="post" style="display: inline;">
                                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                     <button type="submit" class="btn btn-primary">Запиши се</button>
                                 </form>
+                                <span class="badge badge-neutral" th:if="${event.creatorId != null and user != null and event.creatorId.equals(user.id)}">Твое събитие</span>
                             </div>
                             <form th:if="${(event.creatorId != null and user != null and event.creatorId.equals(user.id)) or (user != null and user.role.name() == 'ADMIN')}" 
                                   th:action="@{/events/{eventId}/delete(eventId=${event.id}, redirect='events')}" 

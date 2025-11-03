@@ -7,10 +7,15 @@ import main.model.User;
 import main.repository.EventRepository;
 import main.web.dto.EventCreateRequest;
 import main.web.view.EventView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +23,8 @@ import java.util.UUID;
 
 @Service
 public class EventService {
+
+    private static final Logger logger = LoggerFactory.getLogger(EventService.class);
 
     private final EventRepository eventRepository;
     private final CategoryService categoryService;
@@ -31,6 +38,7 @@ public class EventService {
         this.subscriptionService = subscriptionService;
     }
 
+    @Cacheable(value = "stats", key = "'eventCount'")
     public Long getCount(){
         return eventRepository.count();
     }
@@ -54,6 +62,8 @@ public class EventService {
                 .orElseThrow(() -> new IllegalArgumentException("Събитието не е намерено"));
     }
 
+    @Transactional
+    @CacheEvict(value = {"events", "stats"}, allEntries = true)
     @SuppressWarnings("null")
     public Event create(EventCreateRequest request, User creator) {
         if (creator == null) {
@@ -77,7 +87,9 @@ public class EventService {
                 .creator(creator)
                 .build();
 
-        return eventRepository.save(event);
+        Event saved = eventRepository.save(event);
+        logger.info("Event created successfully: {} by user {}", saved.getName(), creator.getEmail());
+        return saved;
     }
 
     public List<EventView> getEventsForListing(UUID userId, Sort sort, UUID categoryFilter) {
@@ -126,24 +138,26 @@ public class EventService {
         }
 
         subscriptionService.create(user, event);
+        logger.info("User {} subscribed to event {}", user.getEmail(), event.getName());
         return true;
     }
 
     @Transactional
     public boolean unsubscribeUserFromEvent(UUID eventId, User user) {
-        if (!eventRepository.existsById(eventId)) {
-            throw new IllegalArgumentException("Събитието не е намерено");
-        }
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("Събитието не е намерено"));
 
         if (!subscriptionService.existsByUserAndEvent(user.getId(), eventId)) {
             return false;
         }
 
         subscriptionService.deleteByUserAndEvent(user.getId(), eventId);
+        logger.info("User {} unsubscribed from event {}", user.getEmail(), event.getName());
         return true;
     }
 
     @Transactional
+    @CacheEvict(value = {"events", "stats"}, allEntries = true)
     @SuppressWarnings("null")
     public Event update(UUID eventId, EventCreateRequest request, User user) {
         Event event = eventRepository.findById(eventId)
@@ -167,10 +181,13 @@ public class EventService {
         event.setCapacity(request.getCapacity());
         event.setCategory(category);
 
-        return eventRepository.save(event);
+        Event updated = eventRepository.save(event);
+        logger.info("Event updated successfully: {} by user {}", updated.getName(), user.getEmail());
+        return updated;
     }
 
     @Transactional
+    @CacheEvict(value = {"events", "stats"}, allEntries = true)
     public void delete(UUID eventId, User user) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Събитието не е намерено"));
@@ -184,6 +201,22 @@ public class EventService {
 
         subscriptionService.deleteAllByEventId(eventId);
         eventRepository.delete(event);
+        logger.info("Event deleted successfully: {} by user {}", event.getName(), user.getEmail());
+    }
+
+    @Transactional
+    public int deleteEventsOlderThanDays(int days) {
+        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(days);
+        List<Event> oldEvents = eventRepository.findEventsOlderThan(cutoffDate);
+        
+        int deletedCount = 0;
+        for (Event event : oldEvents) {
+            subscriptionService.deleteAllByEventId(event.getId());
+            eventRepository.delete(event);
+            deletedCount++;
+        }
+        
+        return deletedCount;
     }
 
     private EventView toView(Event event, boolean subscribed) {

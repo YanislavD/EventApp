@@ -30,129 +30,145 @@
         <div class="hero-bg"></div>
     </section>
 
-    <div class="container">
-        <div class="card card-wide form-card">
-            <div class="form-headline">
-                <span class="form-badge">🎟️ Създай събитие</span>
-                <h2>Подготви детайлите</h2>
-                <p>Опиши ключовата информация, за да изглежда твоето събитие професионално и привлекателно.</p>
+    <div class="container" style="max-width: 1400px;">
+        <div style="display: grid; grid-template-columns: 1fr 380px; gap: 32px; align-items: start;">
+            <div class="card form-card" style="min-width: 0;">
+                <div class="form-headline" style="margin-bottom: 32px;">
+                    <span class="form-badge">🎟️ Създай събитие</span>
+                    <h2 style="margin: 12px 0 8px 0;">Подготви детайлите</h2>
+                    <p style="margin: 0; color: var(--muted);">Опиши ключовата информация, за да изглежда твоето събитие професионално и привлекателно.</p>
+                </div>
+
+                <form class="form" th:action="@{/events/create}" th:object="${eventCreateRequest}" method="post">
+                    <div style="display: grid; gap: 24px;">
+                        <div>
+                            <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                                <span>📝</span>
+                                <span>Основна информация</span>
+                            </h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="field" style="grid-column: 1 / -1;">
+                                    <div class="field-header">
+                                        <label for="name">Име на събитието</label>
+                                        <span class="badge-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Въведи име</span>
+                                    </div>
+                                    <input id="name" th:field="*{name}" placeholder="Пример: Технологичен форум 2025" th:classappend="${#fields.hasErrors('name')} ? 'invalid'" />
+                                    <p class="field-hint" style="margin-top: 6px; font-size: 12px;">Създай запомнящо се заглавие.</p>
+                                </div>
+
+                                <div class="field">
+                                    <div class="field-header">
+                                        <label for="categoryId">Категория</label>
+                                        <span class="badge-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}">Избери категория</span>
+                                    </div>
+                                    <select id="categoryId" th:field="*{categoryId}" th:classappend="${#fields.hasErrors('categoryId')} ? 'invalid'">
+                                        <option value="" disabled th:selected="${eventCreateRequest.categoryId} == null">Избери категория</option>
+                                        <option th:each="category : ${categories}"
+                                                th:value="${category.id}"
+                                                th:text="${category.name}"></option>
+                                    </select>
+                                </div>
+
+                                <div class="field">
+                                    <div class="field-header">
+                                        <label for="capacity">Капацитет (по избор)</label>
+                                        <span class="badge-error" th:if="${#fields.hasErrors('capacity')}" th:errors="*{capacity}">Въведи капацитет</span>
+                                    </div>
+                                    <input id="capacity" type="number" min="1" step="1" th:field="*{capacity}" placeholder="Остави празно за неограничен" th:classappend="${#fields.hasErrors('capacity')} ? 'invalid'" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                                <span>📄</span>
+                                <span>Описание</span>
+                            </h3>
+                            <div class="field">
+                                <div class="field-header">
+                                    <label for="description">Описание</label>
+                                    <span class="badge-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Добави описание</span>
+                                </div>
+                                <textarea id="description" rows="6" th:field="*{description}" placeholder="Разкажи накратко какво предстои, кои са акцентите и защо не трябва да се пропуска." style="resize: vertical;" th:classappend="${#fields.hasErrors('description')} ? 'invalid'"></textarea>
+                                <p class="field-hint" style="margin-top: 6px; font-size: 12px;">Сподели ключовите акценти, гост-лекторите или специалните активности.</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                                <span>⏱️</span>
+                                <span>График</span>
+                            </h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="field">
+                                    <div class="field-header">
+                                        <label for="startTime">Начало</label>
+                                        <span class="badge-error" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}">Началото е задължително</span>
+                                    </div>
+                                    <input id="startTime" type="datetime-local" th:field="*{startTime}" th:classappend="${#fields.hasErrors('startTime')} ? 'invalid'" />
+                                </div>
+
+                                <div class="field">
+                                    <div class="field-header">
+                                        <label for="endTime">Край</label>
+                                        <span class="badge-error" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}">Краят е задължителен</span>
+                                    </div>
+                                    <input id="endTime" type="datetime-local" th:field="*{endTime}" th:classappend="${#fields.hasErrors('endTime')} ? 'invalid'" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+                        <a class="btn btn-secondary" th:href="@{/home}" style="text-decoration: none;">Отказ</a>
+                        <button type="submit" class="btn btn-primary" style="background: #4f46e5; color: #fff;">Създай събитие</button>
+                    </div>
+                </form>
             </div>
 
-            <form class="form" th:action="@{/events/create}" th:object="${eventCreateRequest}" method="post">
-
-                <section class="form-section">
-                    <div class="form-section-header">
-                        <span class="form-section-icon">📝</span>
+            <div style="position: sticky; top: 24px;">
+                <div class="card" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(79, 70, 229, 0.02) 100%); border: 1px solid rgba(79, 70, 229, 0.1);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                        <span style="font-size: 28px;">💡</span>
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 700;">Полезни съвети</h3>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 16px; color: var(--muted); font-size: 13px; line-height: 1.6;">
                         <div>
-                            <h3>Основна информация</h3>
-                            <p>Въведи кратко и запомнящо се описание, което ще събуди интереса на участниците.</p>
+                            <div style="font-weight: 700; color: #4f46e5; margin-bottom: 6px; font-size: 14px;">📝 Заглавие</div>
+                            <p style="margin: 0;">Създай запомнящо се и ясно заглавие, което казва на кого е събитието.</p>
                         </div>
-                    </div>
-
-                    <div class="form-grid form-grid--two">
-                        <div class="field">
-                            <div class="field-header">
-                                <label for="name">Име на събитието</label>
-                                <span class="badge-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Въведи име</span>
-                            </div>
-                            <input id="name" th:field="*{name}" placeholder="Пример: Технологичен форум 2025" th:classappend="${#fields.hasErrors('name')} ? 'invalid'" />
-                            <p class="field-hint">Създай запомнящо се заглавие – един ред, който ясно казва за кого е събитието.</p>
-                        </div>
-
-                        <div class="field">
-                            <div class="field-header">
-                                <label for="categoryId">Категория</label>
-                                <span class="badge-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}">Избери категория</span>
-                            </div>
-                            <select id="categoryId" th:field="*{categoryId}" th:classappend="${#fields.hasErrors('categoryId')} ? 'invalid'">
-                                <option value="" disabled th:selected="${eventCreateRequest.categoryId} == null">Избери категория</option>
-                                <option th:each="category : ${categories}"
-                                        th:value="${category.id}"
-                                        th:text="${category.name}"></option>
-                            </select>
-                            <p class="field-hint">
-                                Избери най-подходящата категория, за да откриват участниците по-лесно събитието.
-                            </p>
-                        </div>
-                        <div class="field field-wide">
-                            <div class="field-header">
-                                <label for="description">Описание</label>
-                                <span class="badge-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Добави описание</span>
-                            </div>
-                            <textarea id="description" rows="5" th:field="*{description}" placeholder="Разкажи накратко какво предстои, кои са акцентите и защо не трябва да се пропуска." th:classappend="${#fields.hasErrors('description')} ? 'invalid'"></textarea>
-                            <p class="field-hint">Сподели ключовите акценти, гост-лекторите или специалните активности – до 3-4 изречения.</p>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="form-section">
-                    <div class="form-section-header">
-                        <span class="form-section-icon">⏱️</span>
                         <div>
-                            <h3>График</h3>
-                            <p>Определи периода, за да могат гостите да планират участието си.</p>
+                            <div style="font-weight: 700; color: #4f46e5; margin-bottom: 6px; font-size: 14px;">🏷️ Категория</div>
+                            <p style="margin: 0;">Избери подходяща категория, за да могат участниците да открият събитието по-лесно.</p>
                         </div>
-                    </div>
-
-                    <div class="form-grid form-grid--two">
-                        <div class="field">
-                            <div class="field-header">
-                                <label for="startTime">Начало</label>
-                                <span class="badge-error" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}">Началото е задължително</span>
-                            </div>
-                            <input id="startTime" type="datetime-local" th:field="*{startTime}" th:classappend="${#fields.hasErrors('startTime')} ? 'invalid'" />
-                            <p class="field-hint">Дата и час за старта – участниците ще получат напомняне според него.</p>
-                        </div>
-
-                        <div class="field">
-                            <div class="field-header">
-                                <label for="endTime">Край</label>
-                                <span class="badge-error" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}">Краят е задължителен</span>
-                            </div>
-                            <input id="endTime" type="datetime-local" th:field="*{endTime}" th:classappend="${#fields.hasErrors('endTime')} ? 'invalid'" />
-                            <p class="field-hint">Планирай финала – важно е за ангажимента и логистиката на събитието.</p>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="form-section">
-                    <div class="form-section-header">
-                        <span class="form-section-icon">👥</span>
                         <div>
-                            <h3>Достъп & капацитет</h3>
-                            <p>Контролирай броя участници, за да осигуриш комфортно преживяване.</p>
+                            <div style="font-weight: 700; color: #4f46e5; margin-bottom: 6px; font-size: 14px;">📄 Описание</div>
+                            <p style="margin: 0;">Опиши ключовите акценти, гост-лекторите или специалните активности.</p>
                         </div>
-                    </div>
-
-                    <div class="field field-inline">
-                        <div class="field-header">
-                            <label for="capacity">Капацитет</label>
-                            <span class="badge-error" th:if="${#fields.hasErrors('capacity')}" th:errors="*{capacity}">Въведи капацитет</span>
-                        </div>
-                        <input id="capacity" type="number" min="1" step="1" th:field="*{capacity}" th:classappend="${#fields.hasErrors('capacity')} ? 'invalid'" />
-                        <p class="field-hint">Определи максималния брой места – можеш да го актуализираш и по-късно.</p>
-                    </div>
-                </section>
-
-                <div class="form-divider"></div>
-
-                <div class="form-footer">
-                    <div class="form-meta">
-                        <span class="form-meta-icon">💡</span>
                         <div>
-                            <strong>Съвет:</strong>
-                            <p>Провери още веднъж детайлите – всеки записан участник ще получи информацията точно както е тук.</p>
+                            <div style="font-weight: 700; color: #4f46e5; margin-bottom: 6px; font-size: 14px;">⏱️ График</div>
+                            <p style="margin: 0;">Определи начало и край, за да могат гостите да планират участието си.</p>
                         </div>
-                    </div>
-
-                    <div class="form-actions">
-                        <a class="btn btn-secondary" th:href="@{/home}">Отказ</a>
-                        <button type="submit" class="btn btn-primary">Създай събитие</button>
+                        <div>
+                            <div style="font-weight: 700; color: #4f46e5; margin-bottom: 6px; font-size: 14px;">👥 Капацитет</div>
+                            <p style="margin: 0;">Остави празно за неограничен капацитет или задай конкретен брой места.</p>
+                        </div>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
+
+    <style>
+        @media (max-width: 1024px) {
+            .container > div[style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+            }
+            .container > div[style*="position: sticky"] {
+                position: static !important;
+            }
+        }
+    </style>
 </main>
 
 <th:block th:replace="~{fragments/footer :: siteFooter}"></th:block>

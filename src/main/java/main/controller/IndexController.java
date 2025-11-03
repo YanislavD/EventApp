@@ -1,6 +1,7 @@
 package main.controller;
 
 import jakarta.validation.Valid;
+import main.service.CategoryService;
 import main.service.EventService;
 import main.service.UserService;
 import main.web.dto.LoginRequest;
@@ -16,10 +17,12 @@ public class IndexController {
 
     private final EventService eventService;
     private final UserService userService;
+    private final CategoryService categoryService;
 
-    public IndexController(EventService eventService, UserService userService) {
+    public IndexController(EventService eventService, UserService userService, CategoryService categoryService) {
         this.eventService = eventService;
         this.userService = userService;
+        this.categoryService = categoryService;
     }
 
     @GetMapping
@@ -29,7 +32,7 @@ public class IndexController {
         modelAndView.setViewName("index");
         modelAndView.addObject("eventsCounter", eventService.getCount());
         modelAndView.addObject("usersCounter", userService.getCount());
-        modelAndView.addObject("categoriesCounter", eventService.getDistinctCategoryCount());
+        modelAndView.addObject("categoriesCounter", categoryService.getCount());
         return modelAndView;
     }
 
