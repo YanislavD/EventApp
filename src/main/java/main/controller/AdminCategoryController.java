@@ -32,18 +32,8 @@ public class AdminCategoryController {
                                        BindingResult bindingResult) {
 
         if (!bindingResult.hasErrors()) {
-            String name = categoryCreateRequest.getName();
-            if (name == null) {
-                bindingResult.rejectValue("name", "category.name", "Въведи име на категорията");
-            } else {
-                try {
-                    categoryService.create(name);
-                    return new ModelAndView("redirect:/admin/categories?created");
-                } catch (IllegalArgumentException ex) {
-                    String message = ex.getMessage() != null ? ex.getMessage() : "Невалидна категория";
-                    bindingResult.rejectValue("name", "category.name", message);
-                }
-            }
+            categoryService.create(categoryCreateRequest.getName());
+            return new ModelAndView("redirect:/admin/categories?created");
         }
 
         ModelAndView modelAndView = new ModelAndView("admin-categories");

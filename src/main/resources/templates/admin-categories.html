@@ -16,7 +16,6 @@
             <a class="nav-link" th:href="@{/events/create}">Ново събитие</a>
             <a class="nav-link" th:href="@{/admin/users}">Потребители</a>
             <a class="nav-link" th:href="@{/logout}">Изход</a>
-            <button id="themeToggle" class="icon-btn" aria-label="Превключи тема">🌓</button>
         </nav>
     </div>
 </header>
@@ -63,6 +62,9 @@
                     </div>
 
                     <div class="field field-inline">
+                        <div class="field-alert" th:if="${message}">
+                            <span class="badge-error" th:text="${message}"></span>
+                        </div>
                         <div class="field-header">
                             <label for="name">Име</label>
                             <span class="badge-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Въведи име на категорията</span>
@@ -103,19 +105,6 @@
 </main>
 
 <th:block th:replace="~{fragments/footer :: siteFooter}"></th:block>
-
-<script>
-    (function theme(){
-        const btn = document.getElementById('themeToggle');
-        if(!btn) return;
-        const key = 'eventapp-theme';
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const saved = localStorage.getItem(key);
-        const apply = (m)=>{ document.documentElement.dataset.theme = m; localStorage.setItem(key,m); };
-        apply(saved || (prefersDark ? 'dark' : 'light'));
-        btn.addEventListener('click', ()=> apply(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
-    })();
-</script>
 </body>
 </html>
 

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Страницата не е намерена</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            background: #0f172a;
+            color: #f8fafc;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        .grid {
+            width: min(900px, 90vw);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+            align-items: center;
+        }
+        .text {
+            padding: 24px;
+        }
+        h1 {
+            font-size: clamp(36px, 6vw, 64px);
+            margin: 0 0 16px;
+            color: #a5b4fc;
+        }
+        p {
+            margin: 0 0 32px;
+            line-height: 1.7;
+            color: rgba(248, 250, 252, 0.8);
+        }
+        .cta {
+            display: inline-flex;
+            gap: 12px;
+            align-items: center;
+            padding: 14px 28px;
+            border-radius: 999px;
+            background: linear-gradient(120deg, #6366f1, #8b5cf6);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.5);
+        }
+        .card {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 24px;
+            padding: 32px;
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(79, 70, 229, 0.4), transparent 55%);
+            opacity: 0.8;
+        }
+        .card-content {
+            position: relative;
+            z-index: 1;
+        }
+        .number {
+            font-size: clamp(56px, 10vw, 120px);
+            font-weight: 700;
+            color: rgba(199, 210, 254, 0.9);
+            margin-bottom: 8px;
+        }
+        .label {
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            color: rgba(148, 163, 184, 0.8);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="grid">
+    <div class="text">
+        <h1>Тази страница липсва</h1>
+        <p>Не успяхме да намерим съдържанието, което търсиш. Може би е преместено или URL адресът е изписан неправилно.</p>
+        <a class="cta" th:href="@{/home}">
+            <span>Върни ме към таблото</span>
+            <span aria-hidden="true">↗</span>
+        </a>
+    </div>
+    <div class="card">
+        <div class="card-content">
+            <div class="number">404</div>
+            <div class="label">Not Found</div>
+        </div>
+    </div>
+    <div class="text" style="grid-column: 1 / -1; text-align: center; padding-top: 0;">
+        <p style="margin-bottom: 12px;">Нуждаеш се от помощ?</p>
+        <a class="cta" th:href="@{/events}">
+            <span>Разгледай събития</span>
+            <span aria-hidden="true">→</span>
+        </a>
+    </div>
+</div>
+</body>
+</html>
+

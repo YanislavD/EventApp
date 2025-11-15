@@ -19,7 +19,6 @@
             <a class="nav-link" th:href="@{/admin/categories}" sec:authorize="hasRole('ADMIN')">Категории</a>
             <a class="nav-link" th:href="@{/admin/users}" sec:authorize="hasRole('ADMIN')">Потребители</a>
             <a class="nav-link" th:href="@{/logout}">Изход</a>
-            <button id="themeToggle" class="icon-btn" aria-label="Превключи тема">🌓</button>
         </nav>
     </div>
 </header>
@@ -162,12 +161,14 @@
                         </div>
                     </div>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap; padding-top: 16px; border-top: 1px solid var(--border);">
-                        <a th:href="@{/events/{eventId}/edit(eventId=${event.id})}" class="btn" style="padding: 10px 18px; font-size: 14px; text-decoration: none; flex: 1; text-align: center; min-width: 100px; background: #4f46e5; color: #fff;">
+                        <a th:href="@{/events/{eventId}(eventId=${event.id})}" class="btn" style="padding: 10px 18px; font-size: 14px; text-decoration: none; flex: 1; text-align: center; min-width: 100px; background: #4f46e5; color: #fff;">
                             ✏️ Редактирай
                         </a>
-                        <form th:action="@{/events/{eventId}/delete(eventId=${event.id})}" method="post" style="margin: 0; flex: 1; min-width: 100px;">
+                        <form th:action="@{'/events/' + ${event.id}}" method="post" style="margin: 0; flex: 1; min-width: 100px;">
+                            <input type="hidden" name="_method" value="delete" />
+                            <input type="hidden" name="redirect" value="home" />
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                            <button type="submit" class="btn" style="width: 100%; padding: 10px 18px; font-size: 14px; background: #64748b; color: #fff; border: none; cursor: pointer;" onclick="return confirm('Сигурен ли си, че искаш да изтриеш това събитие? Това действие е необратимо.');">
+                            <button type="submit" class="btn" style="width: 100%; padding: 10px 18px; font-size: 14px; background: #64748b; color: #fff; border: none;">
                                 🗑️ Изтрий
                             </button>
                         </form>
@@ -230,7 +231,51 @@
                             <span>Организатор: <strong th:text="${event.creatorName}" style="color: #64748b;">Организатор</strong></span>
                         </div>
                     </div>
-                    <div style="padding-top: 16px; border-top: 1px solid var(--border);">
+                    <div th:if="${event.ticketCode != null}" class="ticket-toggle">
+                        <button type="button"
+                                class="ticket-toggle-btn"
+                                th:attr="data-target-id=${'ticket-collapse-' + event.id}"
+                                aria-expanded="false">
+                            <span>🎟️ Покажи билета</span>
+                            <span class="ticket-toggle-icon">▼</span>
+                        </button>
+                        <div class="ticket-collapse"
+                             th:id="${'ticket-collapse-' + event.id}"
+                             aria-hidden="true">
+                            <div class="ticket-card">
+                                <div class="ticket-card-header">
+                                    <div>
+                                        <div class="ticket-card-title">Твоят билет</div>
+                                        <div class="ticket-card-note">Покажи кода на входа или отвори QR за моментално сканиране.</div>
+                                    </div>
+                                    <span class="ticket-code" th:text="${event.ticketCode}">0000-0000</span>
+                                </div>
+                                <div class="ticket-actions">
+                                    <div class="ticket-actions-row">
+                                        <button type="button"
+                                                class="btn btn-primary"
+                                                th:attr="data-ticket-code=${event.ticketCode},data-event-name=${event.name}"
+                                                onclick="window.eventTicketModal && window.eventTicketModal.open(this)">
+                                            📲 Покажи QR
+                                        </button>
+                                        <a class="btn btn-secondary"
+                                           th:href="@{'/tickets/' + ${event.ticketCode} + '/qr'}"
+                                           download>
+                                            ⬇️ Изтегли QR
+                                        </a>
+                                    </div>
+                                    <form th:action="@{'/events/' + ${event.id} + '/unsubscribe'}" method="post">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <button type="submit" class="btn btn-secondary">
+                                            🚫 Отпиши се
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="padding-top: 16px; border-top: 1px solid var(--border);" th:if="${event.ticketCode == null}">
                         <form th:action="@{'/events/' + ${event.id} + '/unsubscribe'}" method="post" style="margin: 0;">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <button type="submit" class="btn btn-secondary" style="width: 100%; padding: 10px 18px; font-size: 14px;">
@@ -284,22 +329,92 @@
 <th:block th:replace="~{fragments/footer :: siteFooter}"></th:block>
 
 <script>
-    (function theme(){
-        const btn = document.getElementById('themeToggle');
-        if(!btn) return;
-        const key = 'eventapp-theme';
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const saved = localStorage.getItem(key);
-        const apply = (m)=>{ document.documentElement.dataset.theme = m; localStorage.setItem(key,m); };
-        apply(saved || (prefersDark ? 'dark' : 'light'));
-        btn.addEventListener('click', ()=> apply(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
-    })();
-
     const onReveal = (entries, observer) => {
         entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); observer.unobserve(e.target);} });
     };
     const observer = new IntersectionObserver(onReveal, { threshold: 0.15 });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    (function(){
+        if (window.eventTicketModal) return;
+        const modal = document.createElement('div');
+        modal.className = 'ticket-modal-backdrop';
+        modal.innerHTML = `
+            <div class="ticket-modal-card" role="dialog" aria-modal="true" aria-labelledby="ticketModalTitle">
+                <button type="button" class="ticket-modal-close" aria-label="Затвори">✕</button>
+                <div class="ticket-modal-body">
+                    <p id="ticketModalSubtitle" class="ticket-modal-subtitle">Билет</p>
+                    <h2 id="ticketModalTitle" class="ticket-modal-title">Покажи този QR код при вход</h2>
+                    <img id="ticketModalQr" class="ticket-modal-qr" alt="QR код" src="" />
+                    <code id="ticketModalCode" class="ticket-modal-code">0000-0000</code>
+                    <div class="ticket-modal-actions">
+                        <a id="ticketModalDownload" class="btn btn-primary ticket-modal-download" download>⬇️ Изтегли QR</a>
+                        <button type="button" id="ticketModalCopy" class="btn btn-secondary ticket-modal-copy">📋 Копирай кода</button>
+                    </div>
+                </div>
+            </div>`;
+        document.body.appendChild(modal);
+
+        const closeBtn = modal.querySelector('.ticket-modal-close');
+        const qrImg = modal.querySelector('#ticketModalQr');
+        const codeEl = modal.querySelector('#ticketModalCode');
+        const subtitleEl = modal.querySelector('#ticketModalSubtitle');
+        const downloadLink = modal.querySelector('#ticketModalDownload');
+        const copyBtn = modal.querySelector('#ticketModalCopy');
+
+        const closeModal = () => {
+            modal.style.display = 'none';
+            qrImg.src = '';
+        };
+
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.style.display === 'flex') closeModal(); });
+
+        copyBtn.addEventListener('click', async () => {
+            const code = codeEl.textContent?.trim();
+            if (!code) return;
+            try {
+                await navigator.clipboard.writeText(code);
+                const original = copyBtn.textContent;
+                copyBtn.textContent = '✅ Копирано';
+                setTimeout(() => { copyBtn.textContent = original; }, 2000);
+            } catch (err) {
+                console.error('Clipboard copy failed', err);
+            }
+        });
+
+        window.eventTicketModal = {
+            open(trigger) {
+                if (!trigger) return;
+                const code = trigger.getAttribute('data-ticket-code');
+                if (!code) return;
+                const eventName = trigger.getAttribute('data-event-name') || '';
+                modal.style.display = 'flex';
+                qrImg.src = `/tickets/${code}/qr`;
+                qrImg.alt = `QR код за билет ${code}`;
+                codeEl.textContent = code;
+                subtitleEl.textContent = eventName ? `Билет за ${eventName}` : 'Билет';
+                downloadLink.href = `/tickets/${code}/qr`;
+                closeBtn.focus();
+            }
+        };
+    })();
+
+    document.querySelectorAll('.ticket-toggle-btn').forEach(btn => {
+        const targetId = btn.getAttribute('data-target-id');
+        const collapse = targetId ? document.getElementById(targetId) : null;
+        const icon = btn.querySelector('.ticket-toggle-icon');
+        if (!collapse) return;
+        btn.addEventListener('click', () => {
+            const isOpen = collapse.classList.toggle('is-open');
+            collapse.setAttribute('aria-hidden', (!isOpen).toString());
+            btn.setAttribute('aria-expanded', isOpen.toString());
+            if (icon) {
+                icon.textContent = isOpen ? '▲' : '▼';
+            }
+        });
+    });
 </script>
 </body>
 </html>

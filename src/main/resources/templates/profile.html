@@ -15,7 +15,6 @@
             <a class="nav-link" th:href="@{/admin/categories}" sec:authorize="hasRole('ADMIN')">Категории</a>
             <a class="nav-link" th:href="@{/admin/users}" sec:authorize="hasRole('ADMIN')">Потребители</a>
             <a class="nav-link" th:href="@{/logout}">Изход</a>
-            <button id="themeToggle" class="icon-btn" aria-label="Превключи тема">🌓</button>
         </nav>
     </div>
 </header>
@@ -26,7 +25,7 @@
             <div class="hero-badge">Моят профил</div>
             <h1 class="hero-title" th:text="${user.username}">Потребител</h1>
             <p class="hero-subtitle">Преглед на данните</p>
-            <div class="hero-actions"><a class="btn btn-primary" th:href="@{/profile/edit}">Редактиране</a></div>
+            <div class="hero-actions"><a class="btn btn-primary" th:href="@{/profile(edit=true)}">Редактиране</a></div>
         </div>
         <div class="hero-bg"></div>
     </section>
@@ -66,7 +65,7 @@
                         <h3 style="margin: 0; font-size: 18px; font-weight: 700;">Бързи действия</h3>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <a th:href="@{/profile/edit}" style="color: #4f46e5; text-decoration: none; font-size: 14px; font-weight: 600;">✏️ Редактирай профил →</a>
+                        <a th:href="@{/profile(edit=true)}" style="color: #4f46e5; text-decoration: none; font-size: 14px; font-weight: 600;">✏️ Редактирай профил →</a>
                         <a th:href="@{/events}" style="color: #4f46e5; text-decoration: none; font-size: 14px; font-weight: 600;">🔍 Открий събития →</a>
                         <a th:href="@{/events/create}" style="color: #4f46e5; text-decoration: none; font-size: 14px; font-weight: 600;">➕ Създай събитие →</a>
                     </div>
@@ -87,20 +86,6 @@
 </main>
 
 <th:block th:replace="~{fragments/footer :: siteFooter}"></th:block>
-
-<script>
-    (function theme(){
-        const btn = document.getElementById('themeToggle');
-        if(!btn) return;
-        const key = 'eventapp-theme';
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const saved = localStorage.getItem(key);
-        const apply = (m)=>{ document.documentElement.dataset.theme = m; localStorage.setItem(key,m); };
-        apply(saved || (prefersDark ? 'dark' : 'light'));
-        btn.addEventListener('click', ()=> apply(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
-    })();
-    // no extra animations here to keep it simple
-    </script>
 
 </body>
 </html>

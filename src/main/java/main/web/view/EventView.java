@@ -18,6 +18,7 @@ public class EventView {
     private final UUID creatorId;
     private final String creatorName;
     private final boolean subscribed;
+    private final String ticketCode;
 
     public EventView(UUID id,
                      String name,
@@ -31,7 +32,8 @@ public class EventView {
                      String categoryName,
                      UUID creatorId,
                      String creatorName,
-                     boolean subscribed) {
+                     boolean subscribed,
+                     String ticketCode) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -45,6 +47,7 @@ public class EventView {
         this.creatorId = creatorId;
         this.creatorName = creatorName;
         this.subscribed = subscribed;
+        this.ticketCode = ticketCode;
     }
 
     public UUID getId() {
@@ -97,6 +100,10 @@ public class EventView {
 
     public boolean isSubscribed() {
         return subscribed;
+    }
+
+    public String getTicketCode() {
+        return ticketCode;
     }
 }
 

@@ -3,6 +3,8 @@ package main.service;
 import main.model.Category;
 import main.model.Event;
 import main.model.Role;
+import main.model.Subscription;
+import main.model.Ticket;
 import main.model.User;
 import main.repository.EventRepository;
 import main.web.dto.EventCreateRequest;
@@ -14,10 +16,12 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -29,13 +33,16 @@ public class EventService {
     private final EventRepository eventRepository;
     private final CategoryService categoryService;
     private final SubscriptionService subscriptionService;
+    private final TicketService ticketService;
 
     public EventService(EventRepository eventRepository,
                         CategoryService categoryService,
-                        SubscriptionService subscriptionService) {
+                        SubscriptionService subscriptionService,
+                        TicketService ticketService) {
         this.eventRepository = eventRepository;
         this.categoryService = categoryService;
         this.subscriptionService = subscriptionService;
+        this.ticketService = ticketService;
     }
 
     @Cacheable(value = "stats", key = "'eventCount'")
@@ -47,9 +54,22 @@ public class EventService {
         return categoryService.getAll();
     }
 
+    public Sort resolveSort(String sortParam) {
+        if ("startDesc".equalsIgnoreCase(sortParam)) {
+            return Sort.by(Sort.Direction.DESC, "startTime");
+        }
+        if ("categoryAsc".equalsIgnoreCase(sortParam)) {
+            return Sort.by(Sort.Direction.ASC, "category.name").and(Sort.by(Sort.Direction.ASC, "startTime"));
+        }
+        if ("categoryDesc".equalsIgnoreCase(sortParam)) {
+            return Sort.by(Sort.Direction.DESC, "category.name").and(Sort.by(Sort.Direction.ASC, "startTime"));
+        }
+        return Sort.by(Sort.Direction.ASC, "startTime");
+    }
+
     public List<EventView> getAllEventsForAdmin() {
         return eventRepository.findAll(Sort.by(Sort.Direction.ASC, "startTime")).stream()
-                .map(event -> toView(event, false))
+                .map(event -> toView(event, false, null))
                 .toList();
     }
 
@@ -58,13 +78,39 @@ public class EventService {
     }
 
     public Event getById(UUID eventId) {
+        Objects.requireNonNull(eventId, "Идентификаторът на събитие е задължителен");
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Събитието не е намерено"));
     }
 
+    public void validateSchedule(EventCreateRequest request, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return;
+        }
+        if (request.getStartTime() != null && request.getEndTime() != null &&
+                !request.getEndTime().isAfter(request.getStartTime())) {
+            bindingResult.rejectValue("endTime", "event.endTime.invalid", "Краят трябва да е след началото");
+        }
+    }
+
+    public EventCreateRequest buildEditRequest(UUID eventId, User user) {
+        Event event = getById(eventId);
+        if (event.getCreator() == null || !event.getCreator().getId().equals(user.getId())) {
+            throw new IllegalStateException("Можеш да редактираш само събития, които си създал");
+        }
+
+        EventCreateRequest eventCreateRequest = new EventCreateRequest();
+        eventCreateRequest.setName(event.getName());
+        eventCreateRequest.setDescription(event.getDescription());
+        eventCreateRequest.setStartTime(event.getStartTime());
+        eventCreateRequest.setEndTime(event.getEndTime());
+        eventCreateRequest.setCapacity(event.getCapacity());
+        eventCreateRequest.setCategoryId(event.getCategory() != null ? event.getCategory().getId() : null);
+        return eventCreateRequest;
+    }
+
     @Transactional
     @CacheEvict(value = {"events", "stats"}, allEntries = true)
-    @SuppressWarnings("null")
     public Event create(EventCreateRequest request, User creator) {
         if (creator == null) {
             throw new IllegalArgumentException("Организаторът е задължителен");
@@ -98,26 +144,33 @@ public class EventService {
 
         return eventRepository.findAll(effectiveSort).stream()
                 .filter(event -> categoryFilter == null || (event.getCategory() != null && categoryFilter.equals(event.getCategory().getId())))
-                .map(event -> toView(event, subscribedEventIds.contains(event.getId())))
+                .map(event -> toView(event, subscribedEventIds.contains(event.getId()), null))
                 .toList();
     }
 
     public List<EventView> getCreatedEvents(UUID userId) {
         return eventRepository.findAll(Sort.by(Sort.Direction.ASC, "startTime")).stream()
                 .filter(event -> event.getCreator() != null && event.getCreator().getId().equals(userId))
-                .map(event -> toView(event, false))
+                .map(event -> toView(event, false, null))
                 .toList();
     }
 
     public List<EventView> getSubscribedEvents(UUID userId) {
-        return subscriptionService.getSubscribedEvents(userId).stream()
+        var ticketsByEventId = ticketService.getTicketsForUser(userId);
+
+        return subscriptionService.findByUserId(userId).stream()
+                .map(Subscription::getEvent)
+                .filter(Objects::nonNull)
                 .sorted(Comparator.comparing(Event::getStartTime, Comparator.nullsLast(Comparator.naturalOrder())))
-                .map(event -> toView(event, true))
+                .map(event -> {
+                    Ticket ticket = ticketsByEventId.get(event.getId());
+                    String ticketCode = ticket != null ? ticket.getCode() : null;
+                    return toView(event, true, ticketCode);
+                })
                 .toList();
     }
 
     @Transactional
-    @SuppressWarnings("null")
     public boolean subscribeUserToEvent(UUID eventId, User user) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Събитието не е намерено"));
@@ -144,6 +197,7 @@ public class EventService {
 
     @Transactional
     public boolean unsubscribeUserFromEvent(UUID eventId, User user) {
+        Objects.requireNonNull(eventId, "Идентификаторът на събитие е задължителен");
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Събитието не е намерено"));
 
@@ -158,7 +212,6 @@ public class EventService {
 
     @Transactional
     @CacheEvict(value = {"events", "stats"}, allEntries = true)
-    @SuppressWarnings("null")
     public Event update(UUID eventId, EventCreateRequest request, User user) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Събитието не е намерено"));
@@ -189,6 +242,7 @@ public class EventService {
     @Transactional
     @CacheEvict(value = {"events", "stats"}, allEntries = true)
     public void delete(UUID eventId, User user) {
+        Objects.requireNonNull(eventId, "Идентификаторът на събитие е задължителен");
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Събитието не е намерено"));
 
@@ -202,6 +256,18 @@ public class EventService {
         subscriptionService.deleteAllByEventId(eventId);
         eventRepository.delete(event);
         logger.info("Event deleted successfully: {} by user {}", event.getName(), user.getEmail());
+    }
+
+    @Transactional
+    @CacheEvict(value = {"events", "stats"}, allEntries = true)
+    public void deleteAllByCreatorId(UUID creatorId) {
+        Objects.requireNonNull(creatorId, "Идентификаторът на организатора е задължителен");
+        List<Event> events = eventRepository.findByCreatorId(creatorId);
+        for (Event event : events) {
+            subscriptionService.deleteAllByEventId(event.getId());
+            eventRepository.delete(event);
+            logger.info("Event deleted as part of user cleanup: {}", event.getName());
+        }
     }
 
     @Transactional
@@ -219,7 +285,7 @@ public class EventService {
         return deletedCount;
     }
 
-    private EventView toView(Event event, boolean subscribed) {
+    private EventView toView(Event event, boolean subscribed, String ticketCode) {
         String categoryName = event.getCategory() != null ? event.getCategory().getName() : "";
         User creator = event.getCreator();
         UUID creatorId = creator != null ? creator.getId() : null;
@@ -241,7 +307,9 @@ public class EventService {
                 categoryName,
                 creatorId,
                 creatorName,
-                subscribed
+                subscribed,
+                ticketCode
         );
     }
+
 }

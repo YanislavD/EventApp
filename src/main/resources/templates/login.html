@@ -13,7 +13,6 @@
         <nav class="nav">
             <a class="nav-link" th:href="@{/login}">Вход</a>
             <a class="nav-cta" th:href="@{/register}">Регистрация</a>
-            <button id="themeToggle" class="icon-btn" aria-label="Превключи тема">🌓</button>
         </nav>
     </div>
 </header>
@@ -59,18 +58,5 @@
 </main>
 
 <th:block th:replace="~{fragments/footer :: siteFooter}"></th:block>
-
-<script>
-    (function theme(){
-        const btn = document.getElementById('themeToggle');
-        if(!btn) return;
-        const key = 'eventapp-theme';
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const saved = localStorage.getItem(key);
-        const apply = (m)=>{ document.documentElement.dataset.theme = m; localStorage.setItem(key,m); };
-        apply(saved || (prefersDark ? 'dark' : 'light'));
-        btn.addEventListener('click', ()=> apply(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
-    })();
-</script>
 </body>
 </html>

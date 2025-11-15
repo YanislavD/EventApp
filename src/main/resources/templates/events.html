@@ -15,7 +15,6 @@
             <a class="nav-link" th:href="@{/admin/categories}" sec:authorize="hasRole('ADMIN')">Категории</a>
             <a class="nav-link" th:href="@{/admin/users}" sec:authorize="hasRole('ADMIN')">Потребители</a>
             <a class="nav-link" th:href="@{/logout}">Изход</a>
-            <button id="themeToggle" class="icon-btn" aria-label="Превключи тема">🌓</button>
         </nav>
     </div>
 </header>
@@ -185,12 +184,14 @@
                                 </form>
                                 <span class="badge badge-neutral" th:if="${event.creatorId != null and user != null and event.creatorId.equals(user.id)}">Твое събитие</span>
                             </div>
-                            <form th:if="${(event.creatorId != null and user != null and event.creatorId.equals(user.id)) or (user != null and user.role.name() == 'ADMIN')}" 
-                                  th:action="@{/events/{eventId}/delete(eventId=${event.id}, redirect='events')}" 
-                                  method="post" 
+                            <form th:if="${(event.creatorId != null and user != null and event.creatorId.equals(user.id)) or (user != null and user.role.name() == 'ADMIN')}"
+                                  th:action="@{'/events/' + ${event.id}}"
+                                  method="post"
                                   style="display: inline;">
+                                <input type="hidden" name="_method" value="delete" />
+                                <input type="hidden" name="redirect" value="events" />
                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                <button type="submit" class="btn" style="font-size: 0.85em; padding: 6px 12px; background: #dc3545; color: #fff; border: none; cursor: pointer;" onclick="return confirm('Сигурен ли си, че искаш да изтриеш това събитие? Това действие е необратимо.');">
+                                <button type="submit" class="btn" style="font-size: 0.85em; padding: 6px 12px; background: #dc3545; color: #fff; border: none; cursor: pointer;">
                                     Изтрий
                                 </button>
                             </form>
@@ -204,22 +205,6 @@
 </main>
 
 <th:block th:replace="~{fragments/footer :: siteFooter}"></th:block>
-
-<script>
-    (function theme(){
-        const btn = document.getElementById('themeToggle');
-        if(!btn) return;
-        const key = 'eventapp-theme';
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const saved = localStorage.getItem(key);
-        const apply = (mode) => {
-            document.documentElement.dataset.theme = mode;
-            localStorage.setItem(key, mode);
-        };
-        apply(saved || (prefersDark ? 'dark' : 'light'));
-        btn.addEventListener('click', () => apply(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
-    })();
-</script>
 </body>
 </html>
 

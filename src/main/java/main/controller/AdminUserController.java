@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.List;
@@ -38,32 +39,41 @@ public class AdminUserController {
     @PostMapping("/{userId}/role")
     public ModelAndView changeUserRole(@PathVariable UUID userId,
                                        @RequestParam String role,
-                                       Principal principal) {
-        try {
-            Role newRole;
-            try {
-                newRole = Role.valueOf(role.toUpperCase());
-            } catch (IllegalArgumentException ex) {
-                return new ModelAndView("redirect:/admin/users?error=invalidRole");
-            }
+                                       Principal principal,
+                                       RedirectAttributes redirectAttributes) {
+        Role newRole = Role.valueOf(role.toUpperCase());
 
-            User currentUser = userService.getByEmail(principal.getName());
-            boolean changingOwnRole = currentUser.getId().equals(userId);
+        User currentUser = userService.getByEmail(principal.getName());
+        boolean changingOwnRole = currentUser.getId().equals(userId);
 
-            userService.updateRole(userId, newRole);
+        userService.updateRole(userId, newRole);
 
-            // Ако потребителят променя собствената си роля, инвалидираме сесията
-            if (changingOwnRole) {
-                SecurityContextHolder.clearContext();
-                return new ModelAndView("redirect:/logout");
-            }
-
-            return new ModelAndView("redirect:/admin/users?success=roleChanged");
-        } catch (IllegalArgumentException ex) {
-            return new ModelAndView("redirect:/admin/users?error=notFound");
-        } catch (IllegalStateException ex) {
-            return new ModelAndView("redirect:/admin/users?error=alreadyHasRole");
+        if (changingOwnRole) {
+            SecurityContextHolder.clearContext();
+            return new ModelAndView("redirect:/logout");
         }
+
+        redirectAttributes.addFlashAttribute("successMessage", "Ролята беше променена успешно.");
+        return new ModelAndView("redirect:/admin/users");
+    }
+
+    @PostMapping("/{userId}/delete")
+    public ModelAndView deleteUser(@PathVariable UUID userId,
+                                   Principal principal,
+                                   RedirectAttributes redirectAttributes) {
+        User currentUser = userService.getByEmail(principal.getName());
+        if (currentUser.getId().equals(userId)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Не можеш да изтриеш своя профил.");
+            return new ModelAndView("redirect:/admin/users");
+        }
+
+        try {
+            userService.deleteUserWithData(userId);
+            redirectAttributes.addFlashAttribute("successMessage", "Потребителят беше изтрит успешно.");
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return new ModelAndView("redirect:/admin/users");
     }
 }
 

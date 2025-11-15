@@ -17,4 +17,6 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
 
     @Query("SELECT e FROM Event e WHERE e.endTime < :cutoffDate")
     List<Event> findEventsOlderThan(LocalDateTime cutoffDate);
+
+    List<Event> findByCreatorId(UUID creatorId);
 }

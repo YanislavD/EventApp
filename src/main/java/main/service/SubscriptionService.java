@@ -5,6 +5,7 @@ import main.model.Subscription;
 import main.model.User;
 import main.repository.SubscriptionRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,9 +19,12 @@ import java.util.stream.Collectors;
 public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
+    private final TicketService ticketService;
 
-    public SubscriptionService(SubscriptionRepository subscriptionRepository) {
+    public SubscriptionService(SubscriptionRepository subscriptionRepository,
+                               TicketService ticketService) {
         this.subscriptionRepository = subscriptionRepository;
+        this.ticketService = ticketService;
     }
 
     public List<Subscription> findByUserId(UUID id) {
@@ -50,6 +54,7 @@ public class SubscriptionService {
         return subscriptionRepository.countByEventId(eventId);
     }
 
+    @Transactional
     @SuppressWarnings("null")
     public Subscription create(User user, Event event) {
         if (user == null) {
@@ -64,7 +69,9 @@ public class SubscriptionService {
                 .subscriptionTime(LocalDateTime.now())
                 .build();
         Subscription saved = subscriptionRepository.save(subscription);
-        return Objects.requireNonNull(saved, "Регистрацията не беше запазена");
+        Subscription nonNull = Objects.requireNonNull(saved, "Регистрацията не беше запазена");
+        ticketService.issueTicket(nonNull);
+        return nonNull;
     }
 
     public boolean deleteByUserAndEvent(UUID userId, UUID eventId) {
@@ -72,11 +79,26 @@ public class SubscriptionService {
         if (subscription.isEmpty()) {
             return false;
         }
-        subscription.ifPresent(subscriptionRepository::delete);
+        subscription.ifPresent(value -> {
+            ticketService.deleteBySubscriptionId(value.getId());
+            subscriptionRepository.delete(value);
+        });
         return true;
     }
 
+    @Transactional
     public void deleteAllByEventId(UUID eventId) {
-        subscriptionRepository.findByEventId(eventId).forEach(subscriptionRepository::delete);
+        subscriptionRepository.findByEventId(eventId).forEach(subscription -> {
+            ticketService.deleteBySubscriptionId(subscription.getId());
+            subscriptionRepository.delete(subscription);
+        });
+    }
+
+    @Transactional
+    public void deleteAllByUserId(UUID userId) {
+        subscriptionRepository.findByUserId(userId).forEach(subscription -> {
+            ticketService.deleteBySubscriptionId(subscription.getId());
+            subscriptionRepository.delete(subscription);
+        });
     }
 }

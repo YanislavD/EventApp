@@ -11,9 +11,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.security.Principal;
+import org.springframework.data.domain.Sort;
+
 import java.util.List;
 import java.util.UUID;
-import org.springframework.data.domain.Sort;
 
 @Controller
 public class HomeController {
@@ -21,42 +22,35 @@ public class HomeController {
     private final UserService userService;
     private final EventService eventService;
 
-    public HomeController(EventService eventService, UserService userService) {
+    public HomeController(UserService userService, EventService eventService) {
         this.userService = userService;
         this.eventService = eventService;
     }
 
     @GetMapping("/home")
     public ModelAndView home(Principal principal) {
-        ModelAndView mv = new ModelAndView("home");
-
+        ModelAndView modelAndView = new ModelAndView("home");
         User user = userService.getByEmail(principal.getName());
         List<EventView> subscribedEvents = eventService.getSubscribedEvents(user.getId());
         List<EventView> createdEvents = eventService.getCreatedEvents(user.getId());
-
-        mv.addObject("subscribedEvents", subscribedEvents);
-        mv.addObject("createdEvents", createdEvents);
-        mv.addObject("user", user);
-        return mv;
+        modelAndView.addObject("subscribedEvents", subscribedEvents);
+        modelAndView.addObject("createdEvents", createdEvents);
+        modelAndView.addObject("user", user);
+        return modelAndView;
     }
 
     @GetMapping("/profile")
-    public ModelAndView profile(Principal principal) {
+    public ModelAndView profile(@RequestParam(value = "edit", required = false) Boolean edit,
+                                Principal principal) {
+        boolean editMode = Boolean.TRUE.equals(edit);
         User user = userService.getByEmail(principal.getName());
-        ModelAndView mv = new ModelAndView("profile");
-        mv.addObject("user", user);
-        return mv;
+        String viewName = editMode ? "profile-edit" : "profile";
+        ModelAndView modelAndView = new ModelAndView(viewName);
+        modelAndView.addObject("user", user);
+        return modelAndView;
     }
 
-    @GetMapping("/profile/edit")
-    public ModelAndView editProfileForm(Principal principal) {
-        User user = userService.getByEmail(principal.getName());
-        ModelAndView mv = new ModelAndView("profile-edit");
-        mv.addObject("user", user);
-        return mv;
-    }
-
-    @PostMapping("/profile/edit")
+    @PostMapping("/profile")
     public ModelAndView editProfile(@RequestParam(required = false) String firstName,
                                     @RequestParam(required = false) String lastName,
                                     Principal principal) {
@@ -70,28 +64,14 @@ public class HomeController {
                                @RequestParam(value = "category", required = false) UUID categoryId,
                                Principal principal) {
         User user = userService.getByEmail(principal.getName());
-        Sort sort = resolveSort(sortParam);
-
-        ModelAndView mv = new ModelAndView("events");
-        mv.addObject("events", eventService.getEventsForListing(user.getId(), sort, categoryId));
-        mv.addObject("selectedSort", sortParam);
-        mv.addObject("selectedCategory", categoryId);
-        mv.addObject("user", user);
-        mv.addObject("categories", eventService.getAvailableCategories());
-        return mv;
-    }
-
-    private Sort resolveSort(String sortParam) {
-        if ("startDesc".equalsIgnoreCase(sortParam)) {
-            return Sort.by(Sort.Direction.DESC, "startTime");
-        }
-        if ("categoryAsc".equalsIgnoreCase(sortParam)) {
-            return Sort.by(Sort.Direction.ASC, "category.name").and(Sort.by(Sort.Direction.ASC, "startTime"));
-        }
-        if ("categoryDesc".equalsIgnoreCase(sortParam)) {
-            return Sort.by(Sort.Direction.DESC, "category.name").and(Sort.by(Sort.Direction.ASC, "startTime"));
-        }
-        return Sort.by(Sort.Direction.ASC, "startTime");
+        Sort sort = eventService.resolveSort(sortParam);
+        ModelAndView modelAndView = new ModelAndView("events");
+        modelAndView.addObject("events", eventService.getEventsForListing(user.getId(), sort, categoryId));
+        modelAndView.addObject("selectedSort", sortParam);
+        modelAndView.addObject("selectedCategory", categoryId);
+        modelAndView.addObject("user", user);
+        modelAndView.addObject("categories", eventService.getAvailableCategories());
+        return modelAndView;
     }
 }
 

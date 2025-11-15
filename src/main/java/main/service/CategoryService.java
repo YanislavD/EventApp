@@ -1,5 +1,6 @@
 package main.service;
 
+import main.exception.CategoryAlreadyExistsException;
 import main.model.Category;
 import main.repository.CategoryRepository;
 import org.slf4j.Logger;
@@ -31,7 +32,6 @@ public class CategoryService {
 
     @Transactional
     @CacheEvict(value = "categories", allEntries = true)
-    @SuppressWarnings("null")
     public Category create(String name) {
         String trimmed = name == null ? "" : name.trim();
         if (trimmed.isEmpty()) {
@@ -40,7 +40,7 @@ public class CategoryService {
 
         categoryRepository.findByNameIgnoreCase(trimmed)
                 .ifPresent(existing -> {
-                    throw new IllegalArgumentException("Категория с това име вече съществува");
+                    throw new CategoryAlreadyExistsException("Категория с това име вече съществува");
                 });
 
         Category category = Category.builder()

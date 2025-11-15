@@ -22,10 +22,17 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EventService eventService;
+    private final SubscriptionService subscriptionService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       EventService eventService,
+                       SubscriptionService subscriptionService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.eventService = eventService;
+        this.subscriptionService = subscriptionService;
     }
 
     public Long getCount() {
@@ -36,7 +43,7 @@ public class UserService {
     public void register(RegisterRequest registerRequest) {
 
         if (userRepository.findByUsername(registerRequest.getUsername()) != null || userRepository.findByEmail(registerRequest.getEmail()) != null){
-            throw new UserAlreadyExistsException("Username or Email already exists");
+            throw new UserAlreadyExistsException("Потребителското име или имейл вече е заето");
         }
 
         User user = User.builder()
@@ -92,5 +99,22 @@ public class UserService {
         user.setUpdatedOn(LocalDateTime.now());
         userRepository.save(user);
         logger.info("User role updated: {} to role {}", user.getEmail(), newRole.name());
+    }
+
+    @Transactional
+    public void deleteUserWithData(UUID userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("Идентификаторът на потребителя е задължителен");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Потребителят не е намерен"));
+
+        subscriptionService.deleteAllByUserId(userId);
+
+        eventService.deleteAllByCreatorId(userId);
+
+        userRepository.delete(user);
+        logger.info("User deleted with related data: {}", user.getEmail());
     }
 }

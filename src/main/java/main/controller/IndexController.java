@@ -55,8 +55,6 @@ public class IndexController {
 
     @GetMapping("/logout")
     public ModelAndView logout() {
-        // Spring Security will handle the actual logout (intercepts GET /logout)
-        // This mapping exists to satisfy routing and allows graceful redirect as fallback
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("redirect:/");
         return modelAndView;
@@ -66,9 +64,9 @@ public class IndexController {
     public ModelAndView registerUser(@Valid RegisterRequest registerRequest, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
-            ModelAndView mv = new ModelAndView("register");
-            mv.addObject("registerRequest", registerRequest);
-            return mv;
+            ModelAndView modelAndView = new ModelAndView("register");
+            modelAndView.addObject("registerRequest", registerRequest);
+            return modelAndView;
         }
 
         userService.register(registerRequest);
