@@ -63,5 +63,18 @@ public class CategoryService {
     public Long getCount() {
         return categoryRepository.count();
     }
+
+    @Transactional
+    @CacheEvict(value = "categories", allEntries = true)
+    public void deleteById(UUID id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Липсва идентификатор на категория");
+        }
+        if (!categoryRepository.existsById(id)) {
+            throw new IllegalArgumentException("Категорията не е намерена");
+        }
+        categoryRepository.deleteById(id);
+        logger.info("Category deleted successfully: {}", id);
+    }
 }
 

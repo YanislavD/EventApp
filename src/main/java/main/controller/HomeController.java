@@ -40,22 +40,31 @@ public class HomeController {
     }
 
     @GetMapping("/profile")
-    public ModelAndView profile(@RequestParam(value = "edit", required = false) Boolean edit,
-                                Principal principal) {
-        boolean editMode = Boolean.TRUE.equals(edit);
+    public ModelAndView profile(Principal principal) {
         User user = userService.getByEmail(principal.getName());
-        String viewName = editMode ? "profile-edit" : "profile";
-        ModelAndView modelAndView = new ModelAndView(viewName);
+        ModelAndView modelAndView = new ModelAndView("profile");
         modelAndView.addObject("user", user);
         return modelAndView;
     }
 
-    @PostMapping("/profile")
-    public ModelAndView editProfile(@RequestParam(required = false) String firstName,
+    @GetMapping("/profile/{id}")
+    public ModelAndView editProfilePage(@org.springframework.web.bind.annotation.PathVariable UUID id,
+                                        Principal principal) {
+        User currentUser = userService.getByEmail(principal.getName());
+        if (!currentUser.getId().equals(id)) {
+            return new ModelAndView("redirect:/profile");
+        }
+        ModelAndView modelAndView = new ModelAndView("profile-edit");
+        modelAndView.addObject("user", currentUser);
+        return modelAndView;
+    }
+
+    @PostMapping("/profile/{id}")
+    public ModelAndView editProfile(@org.springframework.web.bind.annotation.PathVariable UUID id,
+                                    @RequestParam(required = false) String firstName,
                                     @RequestParam(required = false) String lastName,
                                     Principal principal) {
-        User user = userService.getByEmail(principal.getName());
-        userService.updateNames(user.getId(), firstName, lastName);
+        userService.updateNames(id, firstName, lastName);
         return new ModelAndView("redirect:/profile");
     }
 

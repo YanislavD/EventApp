@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.security.Principal;
@@ -41,17 +43,18 @@ public class EventController {
         return categoryService.getAll();
     }
 
-    @GetMapping("/create")
+    @GetMapping("/new")
     public ModelAndView showCreateForm() {
         ModelAndView modelAndView = new ModelAndView("event-create");
         modelAndView.addObject("eventCreateRequest", new EventCreateRequest());
         return modelAndView;
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ModelAndView createEvent(@Valid @ModelAttribute("eventCreateRequest") EventCreateRequest eventCreateRequest,
                                     BindingResult bindingResult,
-                                    Principal principal) {
+                                    Principal principal,
+                                    RedirectAttributes redirectAttributes) {
 
         eventService.validateSchedule(eventCreateRequest, bindingResult);
 
@@ -63,30 +66,33 @@ public class EventController {
 
         User creator = userService.getByEmail(principal.getName());
         eventService.create(eventCreateRequest, creator);
-        return new ModelAndView("redirect:/events?created");
+        redirectAttributes.addFlashAttribute("successMessage", "✓ Успех! Събитието беше създадено успешно.");
+        return new ModelAndView("redirect:/events");
     }
 
-    @PostMapping("/{eventId}/subscribe")
+    @PostMapping("/{eventId}/subscriptions")
     public ModelAndView subscribeToEvent(@PathVariable UUID eventId, Principal principal) {
         User user = userService.getByEmail(principal.getName());
         boolean subscribed = eventService.subscribeUserToEvent(eventId, user);
         if (subscribed) {
-            return new ModelAndView("redirect:/events?joined");
+            return new ModelAndView("redirect:/events");
         }
-        return new ModelAndView("redirect:/events?already");
+        return new ModelAndView("redirect:/events");
     }
 
-    @PostMapping("/{eventId}/unsubscribe")
-    public ModelAndView unsubscribeFromEvent(@PathVariable UUID eventId, Principal principal) {
+    @DeleteMapping("/{eventId}/subscriptions")
+    public ModelAndView unsubscribeFromEvent(@PathVariable UUID eventId, Principal principal,
+                                             RedirectAttributes redirectAttributes) {
         User user = userService.getByEmail(principal.getName());
         boolean unsubscribed = eventService.unsubscribeUserFromEvent(eventId, user);
         if (unsubscribed) {
-            return new ModelAndView("redirect:/home?unsubscribed");
+            redirectAttributes.addFlashAttribute("successMessage", "✓ Успех! Успешно се отписахте от събитието.");
+            return new ModelAndView("redirect:/home");
         }
-        return new ModelAndView("redirect:/home?notSubscribed");
+        return new ModelAndView("redirect:/home");
     }
 
-    @GetMapping("/{eventId}")
+    @GetMapping("/{eventId}/editform")
     public ModelAndView showEditForm(@PathVariable UUID eventId, Principal principal) {
         User user = userService.getByEmail(principal.getName());
         EventCreateRequest eventCreateRequest = eventService.buildEditRequest(eventId, user);
@@ -97,7 +103,7 @@ public class EventController {
         return modelAndView;
     }
 
-    @PostMapping("/{eventId}")
+    @PutMapping("/{eventId}")
     public ModelAndView updateEvent(@PathVariable UUID eventId,
                                     @Valid @ModelAttribute("eventCreateRequest") EventCreateRequest eventCreateRequest,
                                     BindingResult bindingResult,
@@ -114,18 +120,20 @@ public class EventController {
         }
 
         eventService.update(eventId, eventCreateRequest, user);
-        return new ModelAndView("redirect:/home?updated");
+        return new ModelAndView("redirect:/home");
     }
 
     @DeleteMapping("/{eventId}")
     public ModelAndView deleteEvent(@PathVariable UUID eventId, Principal principal,
-                                    @RequestParam(value = "redirect", required = false, defaultValue = "home") String redirect) {
+                                    @RequestParam(value = "redirect", required = false, defaultValue = "home") String redirect,
+                                    RedirectAttributes redirectAttributes) {
         User user = userService.getByEmail(principal.getName());
         eventService.delete(eventId, user);
+        redirectAttributes.addFlashAttribute("successMessage", "✓ Успех! Събитието беше изтрито успешно.");
         if ("events".equals(redirect)) {
-            return new ModelAndView("redirect:/events?deleted");
+            return new ModelAndView("redirect:/events");
         }
-        return new ModelAndView("redirect:/home?deleted");
+        return new ModelAndView("redirect:/home");
     }
 }
 

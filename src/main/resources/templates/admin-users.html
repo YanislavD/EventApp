@@ -65,7 +65,7 @@
         <nav class="nav">
             <a class="nav-link" th:href="@{/home}">Табло</a>
             <a class="nav-link" th:href="@{/events}">Събития</a>
-            <a class="nav-link" th:href="@{/events/create}">Ново събитие</a>
+            <a class="nav-link" th:href="@{/events/new}">Ново събитие</a>
             <a class="nav-link" sec:authorize="hasRole('ADMIN')" th:href="@{/admin/categories}">Категории</a>
             <a class="nav-link" sec:authorize="hasRole('ADMIN')" th:href="@{/admin/users}">Потребители</a>
             <a class="nav-link" th:href="@{/logout}">Изход</a>
@@ -180,7 +180,7 @@
                                 <button type="submit"
                                         class="btn btn-secondary"
                                         style="width: 100%; padding: 10px 16px; font-size: 0.9em; background: #dc2626; color: #fff; border: none;"
-                                        onclick="return confirm('Сигурен ли си, че искаш да изтриеш този потребител? Това ще изтрие и всичките му събития.')">
+                                        >
                                     Изтрий потребител
                                 </button>
                             </form>

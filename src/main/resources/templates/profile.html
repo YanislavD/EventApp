@@ -25,7 +25,7 @@
             <div class="hero-badge">Моят профил</div>
             <h1 class="hero-title" th:text="${user.username}">Потребител</h1>
             <p class="hero-subtitle">Преглед на данните</p>
-            <div class="hero-actions"><a class="btn btn-primary" th:href="@{/profile(edit=true)}">Редактиране</a></div>
+            <div class="hero-actions"><a class="btn btn-primary" th:href="@{/profile/{id}(id=${user.id})}">Редактиране</a></div>
         </div>
         <div class="hero-bg"></div>
     </section>
@@ -65,9 +65,9 @@
                         <h3 style="margin: 0; font-size: 18px; font-weight: 700;">Бързи действия</h3>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <a th:href="@{/profile(edit=true)}" style="color: #4f46e5; text-decoration: none; font-size: 14px; font-weight: 600;">✏️ Редактирай профил →</a>
+                        <a th:href="@{/profile/{id}(id=${user.id})}" style="color: #4f46e5; text-decoration: none; font-size: 14px; font-weight: 600;">✏️ Редактирай профил →</a>
                         <a th:href="@{/events}" style="color: #4f46e5; text-decoration: none; font-size: 14px; font-weight: 600;">🔍 Открий събития →</a>
-                        <a th:href="@{/events/create}" style="color: #4f46e5; text-decoration: none; font-size: 14px; font-weight: 600;">➕ Създай събитие →</a>
+                        <a th:href="@{/events/new}" style="color: #4f46e5; text-decoration: none; font-size: 14px; font-weight: 600;">➕ Създай събитие →</a>
                     </div>
                 </div>
                 <div>

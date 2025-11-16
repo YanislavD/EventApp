@@ -13,7 +13,7 @@
         <nav class="nav">
             <a class="nav-link" th:href="@{/home}">Табло</a>
             <a class="nav-link" th:href="@{/events}">Събития</a>
-            <a class="nav-link" th:href="@{/events/create}">Ново събитие</a>
+            <a class="nav-link" th:href="@{/events/new}">Ново събитие</a>
             <a class="nav-link" th:href="@{/admin/users}">Потребители</a>
             <a class="nav-link" th:href="@{/logout}">Изход</a>
         </nav>
@@ -40,8 +40,9 @@
             </div>
         </div>
 
-        <div class="card" th:if="${param.created}">
-            <strong>Готово!</strong> Категорията беше добавена успешно.
+        <div class="card" th:if="${successMessage}">
+            <strong th:text="${#strings.substring(successMessage, 0, 7)}">✓ Успех!</strong>
+            <span th:text="${#strings.substring(successMessage, 8)}">Действието беше изпълнено успешно.</span>
         </div>
 
         <div class="card card-wide form-card">
@@ -96,8 +97,17 @@
             </div>
             <div class="grid" th:if="${!#lists.isEmpty(categories)}">
                 <article class="feature-card" th:each="category : ${categories}">
-                    <h3 th:text="${category.name}">Име на категория</h3>
-                    <div class="meta">ID: <span th:text="${category.id}">...</span></div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <div>
+                            <h3 th:text="${category.name}" style="margin: 0 0 6px 0;">Име на категория</h3>
+                            <div class="meta">ID: <span th:text="${category.id}">...</span></div>
+                        </div>
+                        <form th:action="@{'/admin/categories/' + ${category.id}}" method="post" style="margin: 0;">
+                            <input type="hidden" name="_method" value="delete" />
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button type="submit" class="btn" style="background: #dc2626; color: #fff; border: none;">Изтрий</button>
+                        </form>
+                    </div>
                 </article>
             </div>
         </div>

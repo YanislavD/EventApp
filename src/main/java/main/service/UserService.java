@@ -8,6 +8,8 @@ import main.repository.UserRepository;
 import main.web.dto.RegisterRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -56,9 +58,16 @@ public class UserService {
                 .build();
 
         userRepository.save(user);
+        logger.info("User registered: {}", user.getEmail());
     }
 
     public void updateNames(UUID userId, String firstName, String lastName) {
+        // Enforce that only the currently authenticated user can update their own names
+        String authenticatedEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User authenticatedUser = userRepository.findByEmail(authenticatedEmail);
+        if (authenticatedUser == null || !authenticatedUser.getId().equals(userId)) {
+            throw new AccessDeniedException("Not allowed to edit another user's profile");
+        }
         User user = userRepository.findById(userId).orElseThrow();
         user.setFirstName(firstName);
         user.setLastName(lastName);
