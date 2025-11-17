@@ -88,6 +88,14 @@
                             <textarea id="description" rows="5" th:field="*{description}" placeholder="Разкажи накратко какво предстои, кои са акцентите и защо не трябва да се пропуска." th:classappend="${#fields.hasErrors('description')} ? 'invalid'"></textarea>
                             <p class="field-hint">Сподели ключовите акценти, гост-лекторите или специалните активности – до 3-4 изречения.</p>
                         </div>
+                        <div class="field field-wide">
+                            <div class="field-header">
+                                <label for="location">Локация/Място</label>
+                                <span class="badge-error" th:if="${#fields.hasErrors('location')}" th:errors="*{location}">Въведи локация</span>
+                            </div>
+                            <input id="location" th:field="*{location}" placeholder="Пример: София, НДК, Зала 1" th:classappend="${#fields.hasErrors('location')} ? 'invalid'" />
+                            <p class="field-hint">Укажи къде ще се проведе събитието (адрес, град, зала и т.н.).</p>
+                        </div>
                     </div>
                 </section>
 

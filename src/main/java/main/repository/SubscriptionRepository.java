@@ -1,6 +1,7 @@
 package main.repository;
 
 import main.model.Subscription;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -18,5 +19,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
 
     long countByEventId(UUID eventId);
 
+    @EntityGraph(attributePaths = {"user"})
     List<Subscription> findByEventId(UUID eventId);
 }

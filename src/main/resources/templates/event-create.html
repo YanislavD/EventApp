@@ -95,6 +95,21 @@
 
                         <div>
                             <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                                <span>📍</span>
+                                <span>Локация</span>
+                            </h3>
+                            <div class="field">
+                                <div class="field-header">
+                                    <label for="location">Локация/Място</label>
+                                    <span class="badge-error" th:if="${#fields.hasErrors('location')}" th:errors="*{location}">Въведи локация</span>
+                                </div>
+                                <input id="location" th:field="*{location}" placeholder="Пример: София, НДК, Зала 1" th:classappend="${#fields.hasErrors('location')} ? 'invalid'" />
+                                <p class="field-hint" style="margin-top: 6px; font-size: 12px;">Укажи къде ще се проведе събитието (адрес, град, зала и т.н.).</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
                                 <span>⏱️</span>
                                 <span>График</span>
                             </h3>

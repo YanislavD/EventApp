@@ -2,9 +2,12 @@ package main.controller;
 
 import jakarta.validation.Valid;
 import main.model.Category;
+import main.model.Event;
+import main.model.Subscription;
 import main.model.User;
 import main.service.CategoryService;
 import main.service.EventService;
+import main.service.SubscriptionService;
 import main.service.UserService;
 import main.web.dto.EventCreateRequest;
 import org.springframework.stereotype.Controller;
@@ -31,16 +34,18 @@ public class EventController {
     private final EventService eventService;
     private final CategoryService categoryService;
     private final UserService userService;
+    private final SubscriptionService subscriptionService;
 
-    public EventController(EventService eventService, CategoryService categoryService, UserService userService) {
+    public EventController(EventService eventService, CategoryService categoryService, UserService userService, SubscriptionService subscriptionService) {
         this.eventService = eventService;
         this.categoryService = categoryService;
         this.userService = userService;
+        this.subscriptionService = subscriptionService;
     }
 
     @ModelAttribute("categories")
     public List<Category> categories() {
-        return categoryService.getAll();
+        return categoryService.getAllActive();
     }
 
     @GetMapping("/new")
@@ -134,6 +139,27 @@ public class EventController {
             return new ModelAndView("redirect:/events");
         }
         return new ModelAndView("redirect:/home");
+    }
+
+    @GetMapping("/{eventId}/participants")
+    public ModelAndView showParticipants(@PathVariable UUID eventId, Principal principal) {
+        User currentUser = userService.getByEmail(principal.getName());
+        Event event = eventService.getById(eventId);
+
+        // Проверка дали текущият потребител е организатор на събитието
+        if (event.getCreator() == null || !event.getCreator().getId().equals(currentUser.getId())) {
+            ModelAndView modelAndView = new ModelAndView("error/oops");
+            modelAndView.addObject("title", "Достъпът е отказан");
+            modelAndView.addObject("message", "Нямаш право да виждаш участниците на това събитие. Само организаторът на събитието може да вижда списъка с участници.");
+            return modelAndView;
+        }
+
+        List<Subscription> subscriptions = subscriptionService.findByEventId(eventId);
+
+        ModelAndView modelAndView = new ModelAndView("event-participants");
+        modelAndView.addObject("event", event);
+        modelAndView.addObject("subscriptions", subscriptions);
+        return modelAndView;
     }
 }
 

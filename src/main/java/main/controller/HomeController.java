@@ -33,8 +33,12 @@ public class HomeController {
         User user = userService.getByEmail(principal.getName());
         List<EventView> subscribedEvents = eventService.getSubscribedEvents(user.getId());
         List<EventView> createdEvents = eventService.getCreatedEvents(user.getId());
+        List<EventView> pastSubscribedEvents = eventService.getPastSubscribedEvents(user.getId());
+        List<EventView> pastCreatedEvents = eventService.getPastCreatedEvents(user.getId());
         modelAndView.addObject("subscribedEvents", subscribedEvents);
         modelAndView.addObject("createdEvents", createdEvents);
+        modelAndView.addObject("pastSubscribedEvents", pastSubscribedEvents);
+        modelAndView.addObject("pastCreatedEvents", pastCreatedEvents);
         modelAndView.addObject("user", user);
         return modelAndView;
     }
@@ -76,6 +80,7 @@ public class HomeController {
         Sort sort = eventService.resolveSort(sortParam);
         ModelAndView modelAndView = new ModelAndView("events");
         modelAndView.addObject("events", eventService.getEventsForListing(user.getId(), sort, categoryId));
+        modelAndView.addObject("pastEvents", eventService.getPastEventsForListing(user.getId(), sort, categoryId));
         modelAndView.addObject("selectedSort", sortParam);
         modelAndView.addObject("selectedCategory", categoryId);
         modelAndView.addObject("user", user);

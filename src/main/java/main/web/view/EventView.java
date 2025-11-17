@@ -8,6 +8,7 @@ public class EventView {
     private final UUID id;
     private final String name;
     private final String description;
+    private final String location;
     private final LocalDateTime startTime;
     private final LocalDateTime endTime;
     private final Integer capacity;
@@ -23,6 +24,7 @@ public class EventView {
     public EventView(UUID id,
                      String name,
                      String description,
+                     String location,
                      LocalDateTime startTime,
                      LocalDateTime endTime,
                      Integer capacity,
@@ -37,6 +39,7 @@ public class EventView {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.location = location;
         this.startTime = startTime;
         this.endTime = endTime;
         this.capacity = capacity;
@@ -60,6 +63,10 @@ public class EventView {
 
     public String getDescription() {
         return description;
+    }
+
+    public String getLocation() {
+        return location;
     }
 
     public LocalDateTime getStartTime() {

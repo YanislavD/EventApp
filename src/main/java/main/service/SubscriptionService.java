@@ -54,6 +54,10 @@ public class SubscriptionService {
         return subscriptionRepository.countByEventId(eventId);
     }
 
+    public List<Subscription> findByEventId(UUID eventId) {
+        return subscriptionRepository.findByEventId(eventId);
+    }
+
     @Transactional
     @SuppressWarnings("null")
     public Subscription create(User user, Event event) {

@@ -49,9 +49,14 @@ public class AdminCategoryController {
     }
 
     @DeleteMapping("/{id}")
-    public ModelAndView deleteCategory(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
+    public ModelAndView deleteCategory(@PathVariable UUID id) {
         categoryService.deleteById(id);
-        redirectAttributes.addFlashAttribute("successMessage", "✓ Успех! Категорията беше изтрита успешно.");
+        return new ModelAndView("redirect:/admin/categories");
+    }
+
+    @PostMapping("/{id}/activate")
+    public ModelAndView activateCategory(@PathVariable UUID id) {
+        categoryService.activateById(id);
         return new ModelAndView("redirect:/admin/categories");
     }
 

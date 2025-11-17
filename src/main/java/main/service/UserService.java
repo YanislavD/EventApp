@@ -62,11 +62,11 @@ public class UserService {
     }
 
     public void updateNames(UUID userId, String firstName, String lastName) {
-        // Enforce that only the currently authenticated user can update their own names
+       
         String authenticatedEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User authenticatedUser = userRepository.findByEmail(authenticatedEmail);
         if (authenticatedUser == null || !authenticatedUser.getId().equals(userId)) {
-            throw new AccessDeniedException("Not allowed to edit another user's profile");
+            throw new AccessDeniedException("Не можеш да редактираш профила на друг потребител");
         }
         User user = userRepository.findById(userId).orElseThrow();
         user.setFirstName(firstName);

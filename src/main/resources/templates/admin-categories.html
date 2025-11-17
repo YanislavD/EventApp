@@ -96,17 +96,27 @@
                 Все още няма категории. Добави първата от формата по-горе.
             </div>
             <div class="grid" th:if="${!#lists.isEmpty(categories)}">
-                <article class="feature-card" th:each="category : ${categories}">
+                <article class="feature-card" th:each="category : ${categories}" th:styleappend="${!category.isActive} ? 'opacity: 0.6; border-color: #64748b;'">
                     <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
                         <div>
-                            <h3 th:text="${category.name}" style="margin: 0 0 6px 0;">Име на категория</h3>
-                            <div class="meta">ID: <span th:text="${category.id}">...</span></div>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                <h3 th:text="${category.name}" style="margin: 0;">Име на категория</h3>
+                                <span th:if="${category.isActive}" class="badge" style="background: #10b981; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 4px;">Активна</span>
+                                <span th:if="${!category.isActive}" class="badge" style="background: #64748b; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 4px;">Неактивна</span>
+                            </div>
+                            <div class="meta" style="font-size: 12px; color: var(--muted);">ID: <span th:text="${category.id}">...</span></div>
                         </div>
-                        <form th:action="@{'/admin/categories/' + ${category.id}}" method="post" style="margin: 0;">
-                            <input type="hidden" name="_method" value="delete" />
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                            <button type="submit" class="btn" style="background: #dc2626; color: #fff; border: none;">Изтрий</button>
-                        </form>
+                        <div style="display: flex; gap: 8px;">
+                            <form th:if="${category.isActive}" th:action="@{'/admin/categories/' + ${category.id}}" method="post" style="margin: 0;">
+                                <input type="hidden" name="_method" value="delete" />
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button type="submit" class="btn" style="background: #dc2626; color: #fff; border: none; font-size: 13px; padding: 8px 16px;">Деактивирай</button>
+                            </form>
+                            <form th:if="${!category.isActive}" th:action="@{'/admin/categories/' + ${category.id} + '/activate'}" method="post" style="margin: 0;">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button type="submit" class="btn" style="background: #10b981; color: #fff; border: none; font-size: 13px; padding: 8px 16px;">Активирай</button>
+                            </form>
+                        </div>
                     </div>
                 </article>
             </div>

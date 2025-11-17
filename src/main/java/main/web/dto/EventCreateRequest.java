@@ -17,6 +17,9 @@ public class EventCreateRequest {
     @NotBlank(message = "Добави описание")
     private String description;
 
+    @NotBlank(message = "Въведи локация/място на събитието")
+    private String location;
+
     @NotNull(message = "Избери начална дата")
     @Future(message = "Началото трябва да е в бъдещето")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
@@ -47,6 +50,14 @@ public class EventCreateRequest {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public LocalDateTime getStartTime() {

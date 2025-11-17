@@ -30,6 +30,10 @@ public class CategoryService {
         return categoryRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
     }
 
+    public List<Category> getAllActive() {
+        return categoryRepository.findByIsActiveTrue(Sort.by(Sort.Direction.ASC, "name"));
+    }
+
     @Transactional
     @CacheEvict(value = "categories", allEntries = true)
     public Category create(String name) {
@@ -45,6 +49,7 @@ public class CategoryService {
 
         Category category = Category.builder()
                 .name(trimmed)
+                .isActive(true)
                 .build();
 
         Category saved = categoryRepository.save(category);
@@ -65,16 +70,32 @@ public class CategoryService {
     }
 
     @Transactional
-    @CacheEvict(value = "categories", allEntries = true)
+    @CacheEvict(value = {"categories", "events", "stats"}, allEntries = true)
     public void deleteById(UUID id) {
         if (id == null) {
             throw new IllegalArgumentException("Липсва идентификатор на категория");
         }
-        if (!categoryRepository.existsById(id)) {
-            throw new IllegalArgumentException("Категорията не е намерена");
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Категорията не е намерена"));
+
+        // Mark category as inactive instead of deleting it
+        category.setIsActive(false);
+        categoryRepository.save(category);
+        logger.info("Category deactivated successfully: {} ({})", id, category.getName());
+    }
+
+    @Transactional
+    @CacheEvict(value = "categories", allEntries = true)
+    public void activateById(UUID id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Липсва идентификатор на категория");
         }
-        categoryRepository.deleteById(id);
-        logger.info("Category deleted successfully: {}", id);
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Категорията не е намерена"));
+
+        category.setIsActive(true);
+        categoryRepository.save(category);
+        logger.info("Category activated successfully: {} ({})", id, category.getName());
     }
 }
 

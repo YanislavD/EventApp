@@ -11,7 +11,7 @@
     <div class="container topbar">
         <a class="brand" th:href="@{/}">EventApp</a>
         <nav class="nav">
-            <a class="nav-link" th:href="@{/home}">Моите</a>
+            <a class="nav-link" th:href="@{/home}">Табло</a>
             <a class="nav-link" th:href="@{/admin/categories}" sec:authorize="hasRole('ADMIN')">Категории</a>
             <a class="nav-link" th:href="@{/admin/users}" sec:authorize="hasRole('ADMIN')">Потребители</a>
             <a class="nav-link" th:href="@{/logout}">Изход</a>
@@ -163,6 +163,10 @@
                             <strong>Край:</strong>
                             <span th:text="${#temporals.format(event.endTime, 'dd.MM.yyyy HH:mm')}">Край</span>
                         </span>
+                        <span th:if="${!#strings.isEmpty(event.location)}">
+                            <strong>📍 Локация:</strong>
+                            <span th:text="${event.location}">Локация</span>
+                        </span>
                         <span th:if="${event.capacity != null}">
                             <strong>Свободни места:</strong>
                             <span th:text="${event.remainingCapacity > 0 ? event.remainingCapacity : 0}">0</span>
@@ -204,6 +208,47 @@
                                 </button>
                             </form>
                         </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <div class="card" th:if="${!#lists.isEmpty(pastEvents)}" style="margin-top: 48px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: 12px;">
+            <div style="margin-bottom: 24px;">
+                <h2 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 700;">Изтекли събития</h2>
+                <p style="margin: 0; color: var(--muted); font-size: 14px;">История на минали събития</p>
+            </div>
+
+            <div class="events-grid">
+                <article class="feature-card event-card" th:each="event : ${pastEvents}" style="opacity: 0.8;">
+                    <div class="event-card-header">
+                        <div>
+                            <h3 th:text="${event.name}">Име на събитие</h3>
+                            <p class="event-card-subtitle"
+                               th:text="${!#strings.isEmpty(event.creatorName) ? 'Организатор: ' + event.creatorName : 'Организатор неизвестен'}">Организатор</p>
+                        </div>
+                        <span class="badge badge-neutral" th:if="${!#strings.isEmpty(event.categoryName)}" th:text="${event.categoryName}">Категория</span>
+                    </div>
+
+                    <p class="event-card-description" th:text="${event.description}">Описание на събитието</p>
+
+                    <div class="event-card-meta">
+                        <span>
+                            <strong>Начало:</strong>
+                            <span th:text="${event.startTime != null ? #temporals.format(event.startTime, 'dd.MM.yyyy HH:mm') : 'Дата TBA'}">Дата</span>
+                        </span>
+                        <span th:if="${event.endTime != null}">
+                            <strong>Край:</strong>
+                            <span th:text="${#temporals.format(event.endTime, 'dd.MM.yyyy HH:mm')}">Край</span>
+                        </span>
+                        <span th:if="${!#strings.isEmpty(event.location)}">
+                            <strong>📍 Локация:</strong>
+                            <span th:text="${event.location}">Локация</span>
+                        </span>
+                        <span th:if="${event.capacity != null}">
+                            <strong>Записани:</strong>
+                            <span th:text="${event.registeredCount}">0</span>
+                        </span>
                     </div>
                 </article>
             </div>

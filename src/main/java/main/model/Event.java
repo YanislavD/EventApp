@@ -26,6 +26,8 @@ public class Event {
 
     private String description;
 
+    private String location;
+
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
