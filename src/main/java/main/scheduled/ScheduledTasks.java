@@ -16,12 +16,12 @@ public class ScheduledTasks {
         this.eventService = eventService;
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 0 2 * * ?")
     public void cleanupPastEvents() {
         logger.info("Starting scheduled task: cleanupPastEvents");
         try {
-            int deletedCount = eventService.deleteEventsOlderThanDays(3);
-            logger.info("Completed scheduled task: cleanupPastEvents - deleted {} events older than 3 days", deletedCount);
+            int deletedCount = eventService.deleteEventsOlderThanDays(2);
+            logger.info("Completed scheduled task: cleanupPastEvents - deleted {} events older than 2 days", deletedCount);
         } catch (Exception e) {
             logger.error("Error in cleanupPastEvents task", e);
         }

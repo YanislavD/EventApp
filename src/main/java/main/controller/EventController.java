@@ -48,6 +48,17 @@ public class EventController {
         return categoryService.getAllActive();
     }
 
+    @ModelAttribute("availableImages")
+    public List<String> availableImages() {
+        return List.of(
+                "event-business.jpg",
+                "event-networking.jpg",
+                "event-workshop.jpg",
+                "event-presentation.jpg",
+                "event-gathering.jpg"
+        );
+    }
+
     @GetMapping("/new")
     public ModelAndView showCreateForm() {
         ModelAndView modelAndView = new ModelAndView("event-create");

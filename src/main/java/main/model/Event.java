@@ -28,6 +28,12 @@ public class Event {
 
     private String location;
 
+    private Double latitude;
+
+    private Double longitude;
+
+    private String imageName;
+
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 

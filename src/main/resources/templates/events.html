@@ -143,6 +143,11 @@
 
             <div class="events-grid" th:if="${!#lists.isEmpty(events)}">
                 <article class="feature-card event-card" th:each="event : ${events}">
+                    <div th:if="${!#strings.isEmpty(event.imageName)}" style="margin-bottom: 16px; border-radius: 8px; overflow: hidden;">
+                        <img th:src="@{'/images/events/' + ${event.imageName}}" 
+                             th:alt="${event.name}" 
+                             style="width: 100%; height: 200px; object-fit: cover; display: block;" />
+                    </div>
                     <div class="event-card-header">
                         <div>
                             <h3 th:text="${event.name}">Име на събитие</h3>
@@ -221,6 +226,11 @@
 
             <div class="events-grid">
                 <article class="feature-card event-card" th:each="event : ${pastEvents}" style="opacity: 0.8;">
+                    <div th:if="${!#strings.isEmpty(event.imageName)}" style="margin-bottom: 16px; border-radius: 8px; overflow: hidden;">
+                        <img th:src="@{'/images/events/' + ${event.imageName}}" 
+                             th:alt="${event.name}" 
+                             style="width: 100%; height: 200px; object-fit: cover; display: block;" />
+                    </div>
                     <div class="event-card-header">
                         <div>
                             <h3 th:text="${event.name}">Име на събитие</h3>

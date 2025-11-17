@@ -9,6 +9,9 @@ public class EventView {
     private final String name;
     private final String description;
     private final String location;
+    private final Double latitude;
+    private final Double longitude;
+    private final String imageName;
     private final LocalDateTime startTime;
     private final LocalDateTime endTime;
     private final Integer capacity;
@@ -25,6 +28,9 @@ public class EventView {
                      String name,
                      String description,
                      String location,
+                     Double latitude,
+                     Double longitude,
+                     String imageName,
                      LocalDateTime startTime,
                      LocalDateTime endTime,
                      Integer capacity,
@@ -40,6 +46,9 @@ public class EventView {
         this.name = name;
         this.description = description;
         this.location = location;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.imageName = imageName;
         this.startTime = startTime;
         this.endTime = endTime;
         this.capacity = capacity;
@@ -67,6 +76,18 @@ public class EventView {
 
     public String getLocation() {
         return location;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public String getImageName() {
+        return imageName;
     }
 
     public LocalDateTime getStartTime() {

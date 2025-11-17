@@ -2,7 +2,9 @@ package main.controller;
 
 import main.model.User;
 import main.service.EventService;
+import main.service.RatingService;
 import main.service.UserService;
+import main.web.dto.EventRatingSummaryResponse;
 import main.web.view.EventView;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,10 +23,12 @@ public class HomeController {
 
     private final UserService userService;
     private final EventService eventService;
+    private final RatingService ratingService;
 
-    public HomeController(UserService userService, EventService eventService) {
+    public HomeController(UserService userService, EventService eventService, RatingService ratingService) {
         this.userService = userService;
         this.eventService = eventService;
+        this.ratingService = ratingService;
     }
 
     @GetMapping("/home")
@@ -35,11 +39,23 @@ public class HomeController {
         List<EventView> createdEvents = eventService.getCreatedEvents(user.getId());
         List<EventView> pastSubscribedEvents = eventService.getPastSubscribedEvents(user.getId());
         List<EventView> pastCreatedEvents = eventService.getPastCreatedEvents(user.getId());
+        
+        java.util.Map<java.util.UUID, EventRatingSummaryResponse> ratingsMap = new java.util.HashMap<>();
+        java.util.Map<java.util.UUID, Boolean> hasRatedMap = new java.util.HashMap<>();
+        
+        for (EventView event : pastSubscribedEvents) {
+            EventRatingSummaryResponse ratingSummary = ratingService.getRatingsForEvent(event.getId());
+            ratingsMap.put(event.getId(), ratingSummary);
+            hasRatedMap.put(event.getId(), ratingService.hasUserRated(event.getId(), user.getId()));
+        }
+        
         modelAndView.addObject("subscribedEvents", subscribedEvents);
         modelAndView.addObject("createdEvents", createdEvents);
         modelAndView.addObject("pastSubscribedEvents", pastSubscribedEvents);
         modelAndView.addObject("pastCreatedEvents", pastCreatedEvents);
         modelAndView.addObject("user", user);
+        modelAndView.addObject("ratingsMap", ratingsMap);
+        modelAndView.addObject("hasRatedMap", hasRatedMap);
         return modelAndView;
     }
 

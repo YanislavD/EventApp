@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Редактирай събитие – EventApp</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body class="landing">
 <header class="landing-header">
@@ -93,8 +95,26 @@
                                 <label for="location">Локация/Място</label>
                                 <span class="badge-error" th:if="${#fields.hasErrors('location')}" th:errors="*{location}">Въведи локация</span>
                             </div>
-                            <input id="location" th:field="*{location}" placeholder="Пример: София, НДК, Зала 1" th:classappend="${#fields.hasErrors('location')} ? 'invalid'" />
-                            <p class="field-hint">Укажи къде ще се проведе събитието (адрес, град, зала и т.н.).</p>
+                            <input id="location" th:field="*{location}" placeholder="Търси адрес или кликни на картата" th:classappend="${#fields.hasErrors('location')} ? 'invalid'" />
+                            <input type="hidden" id="latitude" name="latitude" th:field="*{latitude}" />
+                            <input type="hidden" id="longitude" name="longitude" th:field="*{longitude}" />
+                            <p class="field-hint">Търси адрес или кликни на картата, за да избереш локация.</p>
+                        </div>
+                        <div class="field field-wide">
+                            <div id="map" style="height: 400px; width: 100%; border-radius: 8px; margin-top: 16px; border: 1px solid var(--border);"></div>
+                        </div>
+                        <div class="field field-wide">
+                            <div class="field-header">
+                                <label for="imageName">Изображение</label>
+                            </div>
+                            <select id="imageName" th:field="*{imageName}">
+                                <option value="">Без изображение</option>
+                                <option th:each="image : ${availableImages}" 
+                                        th:value="${image}" 
+                                        th:text="${image}"
+                                        th:selected="${eventCreateRequest.imageName != null and eventCreateRequest.imageName.equals(image)}"></option>
+                            </select>
+                            <p class="field-hint">Избери изображение за събитието.</p>
                         </div>
                     </div>
                 </section>
@@ -170,6 +190,96 @@
 </main>
 
 <th:block th:replace="~{fragments/footer :: siteFooter}"></th:block>
+
+<script>
+    let map;
+    let marker;
+    let searchTimeout;
+
+    function initMap() {
+        const locationInput = document.getElementById('location');
+        const latitudeInput = document.getElementById('latitude');
+        const longitudeInput = document.getElementById('longitude');
+        
+        const initialLat = latitudeInput.value ? parseFloat(latitudeInput.value) : 42.6977;
+        const initialLng = longitudeInput.value ? parseFloat(longitudeInput.value) : 23.3219;
+
+        map = L.map('map').setView([initialLat, initialLng], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        if (latitudeInput.value && longitudeInput.value) {
+            marker = L.marker([initialLat, initialLng]).addTo(map);
+            map.setView([initialLat, initialLng], 15);
+        }
+
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            
+            if (marker) {
+                marker.setLatLng([lat, lng]);
+            } else {
+                marker = L.marker([lat, lng]).addTo(map);
+            }
+            
+            latitudeInput.value = lat;
+            longitudeInput.value = lng;
+            
+            reverseGeocode(lat, lng, locationInput);
+        });
+
+        locationInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length < 3) return;
+            
+            searchTimeout = setTimeout(() => {
+                geocode(query, locationInput, latitudeInput, longitudeInput);
+            }, 500);
+        });
+    }
+
+    function geocode(query, locationInput, latitudeInput, longitudeInput) {
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&accept-language=bg`)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const result = data[0];
+                    const lat = parseFloat(result.lat);
+                    const lng = parseFloat(result.lon);
+                    
+                    if (marker) {
+                        marker.setLatLng([lat, lng]);
+                    } else {
+                        marker = L.marker([lat, lng]).addTo(map);
+                    }
+                    
+                    map.setView([lat, lng], 15);
+                    latitudeInput.value = lat;
+                    longitudeInput.value = lng;
+                    locationInput.value = result.display_name;
+                }
+            })
+            .catch(error => console.error('Geocoding error:', error));
+    }
+
+    function reverseGeocode(lat, lng, locationInput) {
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=bg`)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.display_name) {
+                    locationInput.value = data.display_name;
+                }
+            })
+            .catch(error => console.error('Reverse geocoding error:', error));
+    }
+
+    document.addEventListener('DOMContentLoaded', initMap);
+</script>
 </body>
 </html>
 

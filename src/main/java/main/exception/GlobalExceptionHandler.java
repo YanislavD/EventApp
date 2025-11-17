@@ -1,6 +1,6 @@
 package main.exception;
 
-import main.web.dto.RegisterRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -26,7 +26,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ModelAndView handleIllegalArgumentException(IllegalArgumentException ex) {
+    public ModelAndView handleIllegalArgumentException(IllegalArgumentException ex, RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        
+        if (requestURI != null && requestURI.startsWith("/ratings")) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return new ModelAndView("redirect:/home");
+        }
+        
         ModelAndView modelAndView = new ModelAndView("error/404");
         modelAndView.setStatus(HttpStatus.NOT_FOUND);
         modelAndView.addObject("message", ex.getMessage());
@@ -34,11 +41,30 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalStateException.class)
-    public ModelAndView handleIllegalStateException(IllegalStateException ex) {
+    public ModelAndView handleIllegalStateException(IllegalStateException ex, RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        
+        if (requestURI != null && requestURI.startsWith("/ratings")) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return new ModelAndView("redirect:/home");
+        }
+        
         ModelAndView modelAndView = new ModelAndView("error/oops");
         modelAndView.setStatus(HttpStatus.FORBIDDEN);
         modelAndView.addObject("message", ex.getMessage());
         return modelAndView;
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ModelAndView handleRuntimeException(RuntimeException ex, RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        
+        if (requestURI != null && requestURI.startsWith("/ratings")) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return new ModelAndView("redirect:/home");
+        }
+        
+        throw ex;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -103,6 +103,9 @@ public class EventService {
         eventCreateRequest.setName(event.getName());
         eventCreateRequest.setDescription(event.getDescription());
         eventCreateRequest.setLocation(event.getLocation());
+        eventCreateRequest.setLatitude(event.getLatitude());
+        eventCreateRequest.setLongitude(event.getLongitude());
+        eventCreateRequest.setImageName(event.getImageName());
         eventCreateRequest.setStartTime(event.getStartTime());
         eventCreateRequest.setEndTime(event.getEndTime());
         eventCreateRequest.setCapacity(event.getCapacity());
@@ -133,6 +136,9 @@ public class EventService {
                 .name(request.getName())
                 .description(request.getDescription())
                 .location(request.getLocation())
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
+                .imageName(request.getImageName())
                 .startTime(request.getStartTime())
                 .endTime(request.getEndTime())
                 .capacity(request.getCapacity())
@@ -415,6 +421,9 @@ public class EventService {
         event.setName(request.getName());
         event.setDescription(request.getDescription());
         event.setLocation(request.getLocation());
+        event.setLatitude(request.getLatitude());
+        event.setLongitude(request.getLongitude());
+        event.setImageName(request.getImageName());
         event.setStartTime(request.getStartTime());
         event.setEndTime(request.getEndTime());
         event.setCapacity(request.getCapacity());
@@ -497,6 +506,9 @@ public class EventService {
                 event.getName(),
                 event.getDescription(),
                 event.getLocation(),
+                event.getLatitude(),
+                event.getLongitude(),
+                event.getImageName(),
                 event.getStartTime(),
                 event.getEndTime(),
                 event.getCapacity(),
