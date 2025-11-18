@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Участници – EventApp</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" th:href="@{/css/participants.css}" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -24,29 +25,29 @@
 </header>
 
 <main>
-    <section class="hero slim-hero" style="padding: 60px 0 56px; position: relative; overflow: hidden;">
-        <div class="hero-bg" style="position: absolute; inset: 0; height: 100%; background: radial-gradient(1100px 420px at 50% 0px, rgba(79, 70, 229, .18), rgba(79, 70, 229, 0) 65%), linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.05) 100%); pointer-events: none; z-index: 0;"></div>
-        <div class="container hero-inner" style="position: relative; z-index: 1;">
+    <section class="hero slim-hero hero-participants">
+        <div class="hero-bg hero-bg-participants"></div>
+        <div class="container hero-inner hero-inner-participants">
             <div class="hero-badge reveal">Участници</div>
             <h1 class="hero-title" th:text="${event.name}">Име на събитието</h1>
             <p class="hero-subtitle">Списък с всички записани участници</p>
         </div>
     </section>
 
-    <div class="container" style="margin-top: 48px;">
-        <div class="card" style="margin-bottom: 32px; padding: 24px; background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(79, 70, 229, 0.02) 100%); border: 1px solid rgba(79, 70, 229, 0.1);">
-            <div style="display: flex; align-items: flex-start; gap: 12px;">
-                <span style="font-size: 24px; flex-shrink: 0;">ℹ️</span>
-                <div style="flex: 1;">
-                    <div style="font-weight: 700; font-size: 15px; margin-bottom: 6px; color: #4f46e5;">Информация за събитието</div>
-                    <div style="color: var(--muted); font-size: 13px; line-height: 1.6;">
-                        <p style="margin: 0 0 8px 0;" th:if="${event.location != null}">
+    <div class="container container-margin-top">
+        <div class="card info-card-participants">
+            <div class="info-card-content">
+                <span class="info-card-icon">ℹ️</span>
+                <div class="info-card-body">
+                    <div class="info-card-title">Информация за събитието</div>
+                    <div class="info-card-text">
+                        <p th:if="${event.location != null}">
                             <strong>📍 Локация:</strong> <span th:text="${event.location}">Локация</span>
                         </p>
-                        <p style="margin: 0 0 8px 0;" th:if="${event.startTime != null}">
+                        <p th:if="${event.startTime != null}">
                             <strong>📅 Начало:</strong> <span th:text="${#temporals.format(event.startTime, 'dd.MM.yyyy HH:mm')}">Дата</span>
                         </p>
-                        <p style="margin: 0;" th:if="${event.capacity != null}">
+                        <p th:if="${event.capacity != null}">
                             <strong>👥 Капацитет:</strong> <span th:text="${event.capacity}">0</span> места
                         </p>
                     </div>
@@ -54,43 +55,43 @@
             </div>
         </div>
 
-        <div class="card" style="margin-bottom: 32px;">
-            <div style="padding: 24px; border-bottom: 1px solid var(--border);">
-                <h2 style="margin: 0; font-size: 24px; font-weight: 700; display: flex; align-items: center; gap: 12px;">
+        <div class="card card-margin-bottom">
+            <div class="participants-header">
+                <h2 class="participants-title">
                     <span>👥</span>
                     <span>Записани участници (<span th:text="${#lists.size(subscriptions)}">0</span>)</span>
                 </h2>
             </div>
 
-            <div th:if="${#lists.isEmpty(subscriptions)}" style="padding: 48px 24px; text-align: center; color: var(--muted);">
-                <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
-                <p style="margin: 0; font-size: 16px; font-weight: 600;">Все още няма записани участници</p>
-                <p style="margin: 8px 0 0 0; font-size: 14px;">Когато потребители се запишат, те ще се появят тук</p>
+            <div th:if="${#lists.isEmpty(subscriptions)}" class="empty-participants">
+                <div class="empty-participants-icon">📭</div>
+                <p class="empty-participants-title">Все още няма записани участници</p>
+                <p class="empty-participants-text">Когато потребители се запишат, те ще се появят тук</p>
             </div>
 
-            <div th:if="${!#lists.isEmpty(subscriptions)}" style="padding: 24px;">
-                <div style="display: grid; grid-template-columns: 1fr; gap: 16px;">
-                    <div th:each="subscription : ${subscriptions}" class="participant-card" style="background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; transition: all 0.2s ease;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
-                            <div style="flex: 1; min-width: 200px;">
-                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                                    <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px; flex-shrink: 0;">
+            <div th:if="${!#lists.isEmpty(subscriptions)}" class="participants-list">
+                <div class="participants-grid">
+                    <div th:each="subscription : ${subscriptions}" class="participant-card">
+                        <div class="participant-card-content">
+                            <div class="participant-info">
+                                <div class="participant-header">
+                                    <div class="participant-avatar">
                                         <span th:text="${subscription.user != null ? subscription.user.username.substring(0, 1).toUpperCase() : '?'}">U</span>
                                     </div>
                                     <div>
-                                        <div style="font-weight: 700; font-size: 16px; margin-bottom: 4px;" th:text="${subscription.user != null ? subscription.user.username : 'Неизвестен потребител'}">Потребител</div>
-                                        <div style="color: var(--muted); font-size: 13px;" th:text="${subscription.user != null ? subscription.user.email : 'N/A'}">email@example.com</div>
+                                        <div class="participant-name" th:text="${subscription.user != null ? subscription.user.username : 'Неизвестен потребител'}">Потребител</div>
+                                        <div class="participant-email" th:text="${subscription.user != null ? subscription.user.email : 'N/A'}">email@example.com</div>
                                     </div>
                                 </div>
-                                <div style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--muted);">
-                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                <div class="participant-meta">
+                                    <div class="participant-meta-item">
                                         <span>📅</span>
                                         <span>Записан на: <strong th:text="${subscription.subscriptionTime != null ? #temporals.format(subscription.subscriptionTime, 'dd.MM.yyyy HH:mm') : 'N/A'}">Дата</strong></span>
                                     </div>
                                 </div>
                             </div>
-                            <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
-                                <div th:if="${subscription.id != null}" style="padding: 8px 12px; background: rgba(79, 70, 229, 0.1); border-radius: 8px; font-size: 12px; font-weight: 600; color: #4f46e5; font-family: monospace;">
+                            <div class="participant-actions">
+                                <div th:if="${subscription.id != null}" class="participant-id">
                                     ID: <span th:text="${#strings.substring(subscription.id.toString(), 0, 8)}">...</span>
                                 </div>
                             </div>
@@ -100,8 +101,8 @@
             </div>
         </div>
 
-        <div style="text-align: center; margin-top: 32px;">
-            <a th:href="@{/home}" class="btn" style="padding: 12px 24px; text-decoration: none; display: inline-block; background: #4f46e5; color: #fff; border-radius: 8px;">
+        <div class="back-button-container">
+            <a th:href="@{/home}" class="btn back-button">
                 ← Назад към таблото
             </a>
         </div>

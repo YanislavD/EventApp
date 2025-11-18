@@ -1,0 +1,24 @@
+/* Authentication pages styles (login, register) */
+
+.error-message-container {
+    margin-bottom: 1rem;
+}
+
+.error-badge-block {
+    display: block;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.auth-link-text {
+    text-align: center;
+    margin-top: 24px;
+    color: var(--muted);
+}
+
+.auth-link {
+    color: #4f46e5;
+    text-decoration: none;
+    font-weight: 600;
+}
+

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Създай събитие – EventApp</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" th:href="@{/css/forms.css}" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
@@ -31,30 +32,30 @@
         <div class="hero-bg"></div>
     </section>
 
-    <div class="container" style="max-width: 1400px;">
-        <div style="display: grid; grid-template-columns: 1fr 380px; gap: 32px; align-items: start;">
-            <div class="card form-card" style="min-width: 0;">
-                <div class="form-headline" style="margin-bottom: 32px;">
+    <div class="container container-max-width">
+        <div class="create-form-layout">
+            <div class="card form-card form-card-min-width">
+                <div class="form-headline form-headline-large">
                     <span class="form-badge">🎟️ Създай събитие</span>
-                    <h2 style="margin: 12px 0 8px 0;">Подготви детайлите</h2>
-                    <p style="margin: 0; color: var(--muted);">Опиши ключовата информация, за да изглежда твоето събитие професионално и привлекателно.</p>
+                    <h2 class="form-title">Подготви детайлите</h2>
+                    <p class="form-subtitle-text">Опиши ключовата информация, за да изглежда твоето събитие професионално и привлекателно.</p>
                 </div>
 
                 <form class="form" th:action="@{/events}" th:object="${eventCreateRequest}" method="post">
-                    <div style="display: grid; gap: 24px;">
+                    <div class="form-sections">
                         <div>
-                            <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                            <h3 class="form-section-title">
                                 <span>📝</span>
                                 <span>Основна информация</span>
                             </h3>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                                <div class="field" style="grid-column: 1 / -1;">
+                            <div class="form-grid-2">
+                                <div class="field field-full-width">
                                     <div class="field-header">
                                         <label for="name">Име на събитието</label>
                                         <span class="badge-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Въведи име</span>
                                     </div>
                                     <input id="name" th:field="*{name}" placeholder="Пример: Технологичен форум 2025" th:classappend="${#fields.hasErrors('name')} ? 'invalid'" />
-                                    <p class="field-hint" style="margin-top: 6px; font-size: 12px;">Създай запомнящо се заглавие.</p>
+                                    <p class="field-hint field-hint-small">Създай запомнящо се заглавие.</p>
                                 </div>
 
                                 <div class="field">
@@ -78,7 +79,7 @@
                                     <input id="capacity" type="number" min="1" step="1" th:field="*{capacity}" placeholder="Остави празно за неограничен" th:classappend="${#fields.hasErrors('capacity')} ? 'invalid'" />
                                 </div>
 
-                                <div class="field" style="grid-column: 1 / -1;">
+                                <div class="field field-full-width">
                                     <div class="field-header">
                                         <label for="imageName">Изображение</label>
                                     </div>
@@ -88,13 +89,13 @@
                                                 th:value="${image}" 
                                                 th:text="${image}"></option>
                                     </select>
-                                    <p class="field-hint" style="margin-top: 6px; font-size: 12px;">Избери изображение за събитието.</p>
+                                    <p class="field-hint field-hint-small">Избери изображение за събитието.</p>
                                 </div>
                             </div>
                         </div>
 
                         <div>
-                            <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                            <h3 class="form-section-title">
                                 <span>📄</span>
                                 <span>Описание</span>
                             </h3>
@@ -103,13 +104,13 @@
                                     <label for="description">Описание</label>
                                     <span class="badge-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Добави описание</span>
                                 </div>
-                                <textarea id="description" rows="6" th:field="*{description}" placeholder="Разкажи накратко какво предстои, кои са акцентите и защо не трябва да се пропуска." style="resize: vertical;" th:classappend="${#fields.hasErrors('description')} ? 'invalid'"></textarea>
-                                <p class="field-hint" style="margin-top: 6px; font-size: 12px;">Сподели ключовите акценти, гост-лекторите или специалните активности.</p>
+                                <textarea id="description" rows="6" th:field="*{description}" placeholder="Разкажи накратко какво предстои, кои са акцентите и защо не трябва да се пропуска." class="textarea-resize" th:classappend="${#fields.hasErrors('description')} ? 'invalid'"></textarea>
+                                <p class="field-hint field-hint-small">Сподели ключовите акценти, гост-лекторите или специалните активности.</p>
                             </div>
                         </div>
 
                         <div>
-                            <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                            <h3 class="form-section-title">
                                 <span>📍</span>
                                 <span>Локация</span>
                             </h3>
@@ -121,17 +122,17 @@
                                 <input id="location" th:field="*{location}" placeholder="Търси адрес или кликни на картата" th:classappend="${#fields.hasErrors('location')} ? 'invalid'" />
                                 <input type="hidden" id="latitude" name="latitude" th:field="*{latitude}" />
                                 <input type="hidden" id="longitude" name="longitude" th:field="*{longitude}" />
-                                <p class="field-hint" style="margin-top: 6px; font-size: 12px;">Търси адрес или кликни на картата, за да избереш локация.</p>
+                                <p class="field-hint field-hint-small">Търси адрес или кликни на картата, за да избереш локация.</p>
                             </div>
-                            <div id="map" style="height: 400px; width: 100%; border-radius: 8px; margin-top: 16px; border: 1px solid var(--border);"></div>
+                            <div id="map" class="map-container"></div>
                         </div>
 
                         <div>
-                            <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                            <h3 class="form-section-title">
                                 <span>⏱️</span>
                                 <span>График</span>
                             </h3>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="form-grid-2">
                                 <div class="field">
                                     <div class="field-header">
                                         <label for="startTime">Начало</label>
@@ -151,56 +152,45 @@
                         </div>
                     </div>
 
-                    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
-                        <a class="btn btn-secondary" th:href="@{/home}" style="text-decoration: none;">Отказ</a>
-                        <button type="submit" class="btn btn-primary" style="background: #4f46e5; color: #fff;">Създай събитие</button>
+                    <div class="form-footer-custom">
+                        <a class="btn btn-secondary btn-link" th:href="@{/home}">Отказ</a>
+                        <button type="submit" class="btn btn-primary btn-primary-custom">Създай събитие</button>
                     </div>
                 </form>
             </div>
 
-            <div style="position: sticky; top: 24px;">
-                <div class="card" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(79, 70, 229, 0.02) 100%); border: 1px solid rgba(79, 70, 229, 0.1);">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                        <span style="font-size: 28px;">💡</span>
-                        <h3 style="margin: 0; font-size: 18px; font-weight: 700;">Полезни съвети</h3>
+            <div class="create-sidebar">
+                <div class="card sidebar-card">
+                    <div class="sidebar-header">
+                        <span class="sidebar-icon">💡</span>
+                        <h3 class="sidebar-title">Полезни съвети</h3>
                     </div>
-                    <div style="display: flex; flex-direction: column; gap: 16px; color: var(--muted); font-size: 13px; line-height: 1.6;">
+                    <div class="sidebar-content">
                         <div>
-                            <div style="font-weight: 700; color: #4f46e5; margin-bottom: 6px; font-size: 14px;">📝 Заглавие</div>
-                            <p style="margin: 0;">Създай запомнящо се и ясно заглавие, което казва на кого е събитието.</p>
+                            <div class="sidebar-tip-title">📝 Заглавие</div>
+                            <p class="sidebar-tip-text">Създай запомнящо се и ясно заглавие, което казва на кого е събитието.</p>
                         </div>
                         <div>
-                            <div style="font-weight: 700; color: #4f46e5; margin-bottom: 6px; font-size: 14px;">🏷️ Категория</div>
-                            <p style="margin: 0;">Избери подходяща категория, за да могат участниците да открият събитието по-лесно.</p>
+                            <div class="sidebar-tip-title">🏷️ Категория</div>
+                            <p class="sidebar-tip-text">Избери подходяща категория, за да могат участниците да открият събитието по-лесно.</p>
                         </div>
                         <div>
-                            <div style="font-weight: 700; color: #4f46e5; margin-bottom: 6px; font-size: 14px;">📄 Описание</div>
-                            <p style="margin: 0;">Опиши ключовите акценти, гост-лекторите или специалните активности.</p>
+                            <div class="sidebar-tip-title">📄 Описание</div>
+                            <p class="sidebar-tip-text">Опиши ключовите акценти, гост-лекторите или специалните активности.</p>
                         </div>
                         <div>
-                            <div style="font-weight: 700; color: #4f46e5; margin-bottom: 6px; font-size: 14px;">⏱️ График</div>
-                            <p style="margin: 0;">Определи начало и край, за да могат гостите да планират участието си.</p>
+                            <div class="sidebar-tip-title">⏱️ График</div>
+                            <p class="sidebar-tip-text">Определи начало и край, за да могат гостите да планират участието си.</p>
                         </div>
                         <div>
-                            <div style="font-weight: 700; color: #4f46e5; margin-bottom: 6px; font-size: 14px;">👥 Капацитет</div>
-                            <p style="margin: 0;">Остави празно за неограничен капацитет или задай конкретен брой места.</p>
+                            <div class="sidebar-tip-title">👥 Капацитет</div>
+                            <p class="sidebar-tip-text">Остави празно за неограничен капацитет или задай конкретен брой места.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <style>
-        @media (max-width: 1024px) {
-            .container > div[style*="grid-template-columns"] {
-                grid-template-columns: 1fr !important;
-            }
-            .container > div[style*="position: sticky"] {
-                position: static !important;
-            }
-        }
-    </style>
 </main>
 
 <th:block th:replace="~{fragments/footer :: siteFooter}"></th:block>

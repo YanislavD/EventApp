@@ -1,0 +1,251 @@
+/* Form pages styles (event-create, event-edit, profile-edit) */
+
+.map-container {
+    height: 400px;
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 16px;
+    border: 1px solid var(--border);
+}
+
+/* Tips section (reused from home.css) */
+.tips-section {
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(79, 70, 229, 0.02) 100%);
+    border: 1px solid rgba(79, 70, 229, 0.1);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.tips-icon-small {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.tips-content-small {
+    flex: 1;
+}
+
+.tips-title-small {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: #4f46e5;
+}
+
+.tips-text-small {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.tips-text-small p {
+    margin: 0 0 4px 0;
+}
+
+.tips-text-small p:last-child {
+    margin: 0;
+}
+
+.tips-text-small p.info {
+    margin: 0 0 10px 0;
+}
+
+/* Profile page specific improvements */
+.quick-links-grid > div {
+    display: flex;
+    flex-direction: column;
+}
+
+.quick-link-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.tips-text-small {
+    margin-top: 8px;
+}
+
+.tips-text-small p {
+    margin-bottom: 10px;
+    line-height: 1.7;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.tips-text-small p:last-child {
+    margin-bottom: 0;
+}
+
+/* Better spacing for profile quick links section */
+.card-tips .quick-link-item {
+    margin-bottom: 16px;
+}
+
+.card-tips .quick-link-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+/* Form headline */
+.form-headline-margin {
+    margin-bottom: 24px;
+}
+
+.form-subtitle {
+    color: var(--muted);
+    margin-top: 8px;
+}
+
+/* Field hint */
+.field-hint-custom {
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* Form footer */
+.form-footer-custom {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.btn-link {
+    text-decoration: none;
+}
+
+.btn-primary-custom {
+    background: #4f46e5;
+    color: #fff;
+}
+
+/* Event create specific styles */
+.container-max-width {
+    max-width: 1400px;
+}
+
+.create-form-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 32px;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .create-form-layout {
+        grid-template-columns: 1fr;
+    }
+    .create-sidebar {
+        position: static !important;
+    }
+}
+
+.form-card-min-width {
+    min-width: 0;
+}
+
+.form-headline-large {
+    margin-bottom: 32px;
+}
+
+.form-title {
+    margin: 12px 0 8px 0;
+}
+
+.form-subtitle-text {
+    margin: 0;
+    color: var(--muted);
+}
+
+.form-sections {
+    display: grid;
+    gap: 24px;
+}
+
+.form-section-title {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.field-full-width {
+    grid-column: 1 / -1;
+}
+
+.field-hint-small {
+    margin-top: 6px;
+    font-size: 12px;
+}
+
+.textarea-resize {
+    resize: vertical;
+}
+
+.create-sidebar {
+    position: sticky;
+    top: 24px;
+}
+
+.sidebar-card {
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(79, 70, 229, 0.02) 100%);
+    border: 1px solid rgba(79, 70, 229, 0.1);
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.sidebar-icon {
+    font-size: 28px;
+}
+
+.sidebar-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.sidebar-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.sidebar-tip-title {
+    font-weight: 700;
+    color: #4f46e5;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.sidebar-tip-text {
+    margin: 0;
+}
+

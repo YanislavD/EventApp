@@ -8,6 +8,7 @@ import main.web.dto.EventRatingSummaryResponse;
 import main.web.view.EventView;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -16,7 +17,9 @@ import java.security.Principal;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Controller
 public class HomeController {
@@ -39,15 +42,9 @@ public class HomeController {
         List<EventView> createdEvents = eventService.getCreatedEvents(user.getId());
         List<EventView> pastSubscribedEvents = eventService.getPastSubscribedEvents(user.getId());
         List<EventView> pastCreatedEvents = eventService.getPastCreatedEvents(user.getId());
-        
-        java.util.Map<java.util.UUID, EventRatingSummaryResponse> ratingsMap = new java.util.HashMap<>();
-        java.util.Map<java.util.UUID, Boolean> hasRatedMap = new java.util.HashMap<>();
-        
-        for (EventView event : pastSubscribedEvents) {
-            EventRatingSummaryResponse ratingSummary = ratingService.getRatingsForEvent(event.getId());
-            ratingsMap.put(event.getId(), ratingSummary);
-            hasRatedMap.put(event.getId(), ratingService.hasUserRated(event.getId(), user.getId()));
-        }
+        List<UUID> pastSubscribedEventIds = pastSubscribedEvents.stream().map(EventView::getId).collect(Collectors.toList());
+        Map<UUID, EventRatingSummaryResponse> ratingsMap = ratingService.getRatingsForEvents(pastSubscribedEventIds);
+        Map<UUID, Boolean> hasRatedMap = ratingService.getHasRatedMapForEvents(pastSubscribedEventIds, user.getId());
         
         modelAndView.addObject("subscribedEvents", subscribedEvents);
         modelAndView.addObject("createdEvents", createdEvents);
@@ -68,7 +65,7 @@ public class HomeController {
     }
 
     @GetMapping("/profile/{id}")
-    public ModelAndView editProfilePage(@org.springframework.web.bind.annotation.PathVariable UUID id,
+    public ModelAndView editProfilePage(@PathVariable UUID id,
                                         Principal principal) {
         User currentUser = userService.getByEmail(principal.getName());
         if (!currentUser.getId().equals(id)) {
@@ -80,7 +77,7 @@ public class HomeController {
     }
 
     @PostMapping("/profile/{id}")
-    public ModelAndView editProfile(@org.springframework.web.bind.annotation.PathVariable UUID id,
+    public ModelAndView editProfile(@PathVariable UUID id,
                                     @RequestParam(required = false) String firstName,
                                     @RequestParam(required = false) String lastName,
                                     Principal principal) {

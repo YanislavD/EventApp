@@ -1,0 +1,120 @@
+/* Events page styles */
+
+.events-container {
+    /* Container styles if needed */
+}
+
+.event-image-wrapper {
+    margin-bottom: 16px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.event-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+}
+
+.event-card-footer-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.event-card-footer-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.event-action-form {
+    display: inline;
+}
+
+.btn-unsubscribe {
+    font-size: 0.9em;
+    padding: 8px 16px;
+}
+
+.btn-delete-event {
+    font-size: 0.85em;
+    padding: 6px 12px;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.event-card-past {
+    opacity: 0.8;
+}
+
+.past-events-card {
+    margin-top: 48px;
+    padding: 24px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.past-events-header {
+    margin-bottom: 24px;
+}
+
+.past-events-title {
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.past-events-subtitle {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.empty-state-icon {
+    font-size: 64px;
+    margin-bottom: 24px;
+}
+
+.empty-state-title {
+    margin-bottom: 12px;
+}
+
+.empty-state-text {
+    margin-bottom: 24px;
+    color: var(--muted);
+}
+
+.empty-state-footer {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.empty-state-tip-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.empty-state-tip-text {
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.empty-state-link {
+    color: #4f46e5;
+    text-decoration: none;
+}
+

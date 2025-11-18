@@ -1,0 +1,197 @@
+/* Admin pages styles (admin-users, admin-categories) */
+
+/* Users grid */
+.users-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+@media (min-width: 640px) {
+    .users-grid {
+        grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+    }
+}
+
+.user-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.user-info-section {
+    flex: 1;
+    min-width: 200px;
+}
+
+.user-actions-section {
+    min-width: 220px;
+    max-width: 280px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 639px) {
+    .user-actions-section {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+.role-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.role-form-margin {
+    margin-top: 8px;
+}
+
+.role-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    font-size: 0.9em;
+}
+
+.role-select:focus {
+    outline: none;
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px rgba(43, 214, 123, 0.18);
+}
+
+.role-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.875em;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.role-submit-btn {
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 0.9em;
+    white-space: nowrap;
+}
+
+.delete-user-btn {
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 0.9em;
+    background: #dc2626;
+    color: #fff;
+    border: none;
+}
+
+.user-title {
+    margin: 0 0 12px 0;
+}
+
+.meta-margin-top {
+    margin-top: 0;
+}
+
+.meta-item-margin {
+    margin-bottom: 10px;
+}
+
+.meta-small {
+    font-size: 0.875em;
+    color: var(--muted);
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-left: 8px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.role-badge-admin {
+    background: var(--brand);
+    color: #fff;
+}
+
+.role-badge-user {
+    background: var(--border);
+    color: var(--text);
+}
+
+/* Categories */
+.category-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.category-title {
+    margin: 0;
+}
+
+.category-meta {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.category-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.category-btn {
+    background: #dc2626;
+    color: #fff;
+    border: none;
+    font-size: 13px;
+    padding: 8px 16px;
+}
+
+.category-btn-activate {
+    background: #10b981;
+}
+
+.category-form {
+    margin: 0;
+}
+
+.badge-active {
+    background: #10b981;
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.badge-inactive {
+    background: #64748b;
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.category-inactive {
+    opacity: 0.6;
+    border-color: #64748b;
+}
+
+.card-margin-top {
+    margin-top: 24px;
+}
+

@@ -3,8 +3,6 @@ package main.controller;
 import main.model.User;
 import main.service.RatingService;
 import main.service.UserService;
-import main.web.dto.EventRatingSummaryResponse;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -34,14 +32,6 @@ public class RatingController {
         ratingService.createRating(eventId, user.getId(), score);
         redirectAttributes.addFlashAttribute("successMessage", "✓ Оценката беше добавена успешно!");
         return new ModelAndView("redirect:/home");
-    }
-
-
-    @GetMapping("/event/{eventId}")
-    @ResponseBody
-    public ResponseEntity<EventRatingSummaryResponse> getRatingsForEvent(@PathVariable UUID eventId) {
-        EventRatingSummaryResponse response = ratingService.getRatingsForEvent(eventId);
-        return ResponseEntity.ok(response);
     }
 }
 

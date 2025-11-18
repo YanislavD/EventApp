@@ -57,14 +57,6 @@ public class CategoryService {
         return saved;
     }
 
-    public Category getById(UUID id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Липсва идентификатор на категория");
-        }
-        return categoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Категорията не е намерена"));
-    }
-
     public Long getCount() {
         return categoryRepository.count();
     }
@@ -78,7 +70,6 @@ public class CategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Категорията не е намерена"));
 
-        // Mark category as inactive instead of deleting it
         category.setIsActive(false);
         categoryRepository.save(category);
         logger.info("Category deactivated successfully: {} ({})", id, category.getName());

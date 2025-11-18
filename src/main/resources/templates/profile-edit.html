@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Редакция на профил – EventApp</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" th:href="@{/css/forms.css}" />
 </head>
 <body class="landing">
 <header class="landing-header">
@@ -28,21 +29,21 @@
     </section>
 
     <div class="container">
-        <div style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(79, 70, 229, 0.02) 100%); border: 1px solid rgba(79, 70, 229, 0.1); border-radius: 12px; padding: 16px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px;">
-            <span style="font-size: 24px; flex-shrink: 0;">💡</span>
-            <div style="flex: 1;">
-                <div style="font-weight: 700; font-size: 14px; margin-bottom: 6px; color: #4f46e5;">Полезен съвет</div>
-                <div style="color: var(--muted); font-size: 13px; line-height: 1.6;">
+        <div class="tips-section">
+            <span class="tips-icon-small">💡</span>
+            <div class="tips-content-small">
+                <div class="tips-title-small">Полезен съвет</div>
+                <div class="tips-text-small">
                     Попълването на име и фамилия не е задължително, но помага другите потребители да те идентифицират по-лесно. Можеш да ги актуализираш по всяко време.
                 </div>
             </div>
         </div>
 
         <div class="card card-wide">
-            <div class="form-headline" style="margin-bottom: 24px;">
+            <div class="form-headline form-headline-margin">
                 <span class="form-badge">✏️ Редактирай профил</span>
                 <h2 class="mt-0">Актуализирай данните си</h2>
-                <p style="color: var(--muted); margin-top: 8px;">Попълни по избор първо и фамилно име за по-добра идентификация.</p>
+                <p class="form-subtitle">Попълни по избор първо и фамилно име за по-добра идентификация.</p>
             </div>
             <form method="post" th:action="@{/profile/{id}(id=${user.id})}">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
@@ -52,7 +53,7 @@
                         <label for="firstName">Име (по избор)</label>
                     </div>
                     <input id="firstName" name="firstName" th:value="${user.firstName}" placeholder="Пример: Иван" />
-                    <p class="field-hint" style="margin-top: 6px; font-size: 13px; color: var(--muted);">Твоето първо име, което ще се показва в профила ти.</p>
+                    <p class="field-hint field-hint-custom">Твоето първо име, което ще се показва в профила ти.</p>
                 </div>
 
                 <div class="field">
@@ -60,11 +61,11 @@
                         <label for="lastName">Фамилия (по избор)</label>
                     </div>
                     <input id="lastName" name="lastName" th:value="${user.lastName}" placeholder="Пример: Петров" />
-                    <p class="field-hint" style="margin-top: 6px; font-size: 13px; color: var(--muted);">Твоята фамилия, която ще се показва в профила ти.</p>
+                    <p class="field-hint field-hint-custom">Твоята фамилия, която ще се показва в профила ти.</p>
                 </div>
 
-                <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
-                    <a th:href="@{/profile}" class="btn btn-secondary" style="text-decoration: none;">Отказ</a>
+                <div class="form-footer-custom">
+                    <a th:href="@{/profile}" class="btn btn-secondary btn-link">Отказ</a>
                     <button type="submit" class="btn btn-primary">Запази промените</button>
                 </div>
             </form>

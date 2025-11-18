@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Редактирай събитие – EventApp</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" th:href="@{/css/forms.css}" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
@@ -101,7 +102,7 @@
                             <p class="field-hint">Търси адрес или кликни на картата, за да избереш локация.</p>
                         </div>
                         <div class="field field-wide">
-                            <div id="map" style="height: 400px; width: 100%; border-radius: 8px; margin-top: 16px; border: 1px solid var(--border);"></div>
+                            <div id="map" class="map-container"></div>
                         </div>
                         <div class="field field-wide">
                             <div class="field-header">

@@ -18,7 +18,6 @@ public class RatingResponse {
     private UUID eventId;
     private UUID userId;
     private Integer score;
-    private String comment;
     private LocalDateTime createdOn;
     private LocalDateTime updatedOn;
 }

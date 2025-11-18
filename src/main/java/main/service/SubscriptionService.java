@@ -59,7 +59,6 @@ public class SubscriptionService {
     }
 
     @Transactional
-    @SuppressWarnings("null")
     public Subscription create(User user, Event event) {
         if (user == null) {
             throw new IllegalArgumentException("Потребителят е задължителен");
@@ -73,9 +72,8 @@ public class SubscriptionService {
                 .subscriptionTime(LocalDateTime.now())
                 .build();
         Subscription saved = subscriptionRepository.save(subscription);
-        Subscription nonNull = Objects.requireNonNull(saved, "Регистрацията не беше запазена");
-        ticketService.issueTicket(nonNull);
-        return nonNull;
+        ticketService.issueTicket(saved);
+        return saved;
     }
 
     public boolean deleteByUserAndEvent(UUID userId, UUID eventId) {

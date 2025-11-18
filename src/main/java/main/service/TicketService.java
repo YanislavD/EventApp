@@ -30,18 +30,15 @@ public class TicketService {
     }
 
     @Transactional
-    @SuppressWarnings("null")
-    public Ticket issueTicket(Subscription subscription) {
-        Objects.requireNonNull(subscription, "Subscription is required for ticket issuing");
+    public void issueTicket(Subscription subscription) {
         String code = UUID.randomUUID().toString();
         Ticket ticket = Ticket.builder()
                 .subscription(subscription)
                 .code(code)
                 .issuedAt(LocalDateTime.now())
                 .build();
-        Ticket saved = Objects.requireNonNull(ticketRepository.save(ticket), "Ticket was not persisted");
-        logger.info("Ticket issued for subscription {} with code {}", subscription.getId(), saved.getCode());
-        return saved;
+        ticketRepository.save(ticket);
+        logger.info("Ticket issued for subscription {} with code {}", subscription.getId(), ticket.getCode());
     }
 
     public Map<UUID, Ticket> getTicketsForUser(UUID userId) {
@@ -50,13 +47,9 @@ public class TicketService {
                 .collect(Collectors.toMap(ticket -> ticket.getSubscription().getEvent().getId(), ticket -> ticket));
     }
 
-    public Optional<Ticket> findBySubscriptionId(UUID subscriptionId) {
-        return ticketRepository.findBySubscriptionId(subscriptionId);
-    }
 
-    @Transactional(readOnly = true)
+
     public Optional<Ticket> findWithDetailsByCode(String code) {
-        Objects.requireNonNull(code, "Ticket code is required");
         return ticketRepository.findWithDetailsByCode(code);
     }
 

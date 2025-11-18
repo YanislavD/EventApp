@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Регистрация – EventApp</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" th:href="@{/css/auth.css}" />
+    <link rel="stylesheet" th:href="@{/css/forms.css}" />
 </head>
 <body class="landing">
 <header class="landing-header">
@@ -27,22 +29,22 @@
     </section>
 
     <div class="container">
-        <div style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(79, 70, 229, 0.02) 100%); border: 1px solid rgba(79, 70, 229, 0.1); border-radius: 12px; padding: 16px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px;">
-            <span style="font-size: 24px; flex-shrink: 0;">ℹ️</span>
-            <div style="flex: 1;">
-                <div style="font-weight: 700; font-size: 14px; margin-bottom: 6px; color: #4f46e5;">Изисквания</div>
-                <div style="color: var(--muted); font-size: 13px; line-height: 1.6;">
-                    <p style="margin: 0 0 4px 0;">• Потребителското име трябва да е минимум 6 символа</p>
-                    <p style="margin: 0;">• Паролата трябва да е минимум 6 символа за по-добра сигурност</p>
+        <div class="tips-section">
+            <span class="tips-icon-small">ℹ️</span>
+            <div class="tips-content-small">
+                <div class="tips-title-small">Изисквания</div>
+                <div class="tips-text-small">
+                    <p>• Потребителското име трябва да е минимум 6 символа</p>
+                    <p>• Паролата трябва да е минимум 6 символа за по-добра сигурност</p>
                 </div>
             </div>
         </div>
 
         <div class="card card-wide">
-            <div class="form-headline" style="margin-bottom: 24px;">
+            <div class="form-headline form-headline-margin">
                 <span class="form-badge">👤 Създай акаунт</span>
                 <h2 class="mt-0">Регистрация</h2>
-                <p style="color: var(--muted); margin-top: 8px;">Попълни данните по-долу, за да създадеш своя профил и да започнеш да откриваш и организираш събития.</p>
+                <p class="form-subtitle">Попълни данните по-долу, за да създадеш своя профил и да започнеш да откриваш и организираш събития.</p>
             </div>
             <form method="post" th:action="@{/register}" th:object="${registerRequest}">
 
@@ -55,7 +57,7 @@
                         </label>
                     </div>
                     <input id="username" th:field="*{username}" placeholder="Пример: ivan123" th:classappend="${#fields.hasErrors('username')} ? 'invalid'"/>
-                    <p class="field-hint" style="margin-top: 6px; font-size: 13px; color: var(--muted);">Минимум 6 символа. Това име ще се показва на другите потребители.</p>
+                    <p class="field-hint field-hint-custom">Минимум 6 символа. Това име ще се показва на другите потребители.</p>
                 </div>
 
                 <div class="field">
@@ -67,7 +69,7 @@
                         </label>
                     </div>
                     <input id="email" th:field="*{email}" type="email" placeholder="Пример: ivan@example.com" th:classappend="${#fields.hasErrors('email')} ? 'invalid'"/>
-                    <p class="field-hint" style="margin-top: 6px; font-size: 13px; color: var(--muted);">Използвай валиден имейл адрес. Той ще се използва за вход в системата.</p>
+                    <p class="field-hint field-hint-custom">Използвай валиден имейл адрес. Той ще се използва за вход в системата.</p>
                 </div>
 
                 <div class="field">
@@ -78,15 +80,15 @@
                         </label>
                     </div>
                     <input id="password" th:field="*{password}" type="password" placeholder="Минимум 6 символа" th:classappend="${#fields.hasErrors('password')} ? 'invalid'"/>
-                    <p class="field-hint" style="margin-top: 6px; font-size: 13px; color: var(--muted);">Използвай парола с минимум 6 символа. Препоръчваме комбинация от букви, цифри и символи за по-добра сигурност.</p>
+                    <p class="field-hint field-hint-custom">Използвай парола с минимум 6 символа. Препоръчваме комбинация от букви, цифри и символи за по-добра сигурност.</p>
                 </div>
 
-                <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
-                    <button type="submit" class="btn-wide btn-primary" style="background: #4f46e5; color: #fff;">Създай акаунт</button>
+                <div class="form-footer-custom">
+                    <button type="submit" class="btn-wide btn-primary btn-primary-custom">Създай акаунт</button>
                 </div>
 
-                <p class="center mt-12" style="text-align: center; margin-top: 24px; color: var(--muted);">
-                    Имаш акаунт? <a th:href="@{/login}" class="link" style="color: #4f46e5; text-decoration: none; font-weight: 600;">Влез</a>
+                <p class="center mt-12 auth-link-text">
+                    Имаш акаунт? <a th:href="@{/login}" class="auth-link">Влез</a>
                 </p>
             </form>
         </div>

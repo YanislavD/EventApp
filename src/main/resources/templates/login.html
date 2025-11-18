@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Вход – EventApp</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" th:href="@{/css/auth.css}" />
 </head>
 <body class="landing">
 <header class="landing-header">
@@ -31,8 +32,8 @@
             <h2 class="mt-0">Вход</h2>
             <form method="post" th:action="@{/login}" th:object="${loginRequest}">
 
-                <div th:if="${param.error}" style="margin-bottom: 1rem;">
-                    <span class="badge-error" style="display: block; padding: 0.75rem; margin-bottom: 0.5rem;">Невалиден имейл или парола.</span>
+                <div th:if="${param.error}" class="error-message-container">
+                    <span class="badge-error error-badge-block">Невалиден имейл или парола.</span>
                 </div>
 
                 <label for="email">

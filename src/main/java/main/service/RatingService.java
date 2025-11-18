@@ -11,8 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -30,10 +34,6 @@ public class RatingService {
     }
 
     public RatingResponse createRating(UUID eventId, UUID userId, Integer score) {
-        if (score == null || score < 1 || score > 5) {
-            throw new IllegalArgumentException("Оценката трябва да е между 1 и 5");
-        }
-
         Event event = eventService.getById(eventId);
 
         if (event.getEndTime() == null || event.getEndTime().isAfter(LocalDateTime.now())) {
@@ -51,12 +51,9 @@ public class RatingService {
 
         try {
             ResponseEntity<RatingResponse> response = ratingClient.createRating(ratingRequest);
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                logger.info("Rating created successfully for event {} by user {}", eventId, userId);
-                return response.getBody();
-            }
-            throw new RuntimeException("Failed to create rating");
-        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            logger.info("Rating created successfully for event {} by user {}", eventId, userId);
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
             if (e.getStatusCode().value() == 400) {
                 logger.warn("User {} already rated event {} or invalid request", userId, eventId);
                 throw new IllegalStateException("Вече си оценил това събитие");
@@ -116,6 +113,22 @@ public class RatingService {
             logger.error("Error checking if user {} has rated event {}", userId, eventId, e);
             return false;
         }
+    }
+
+    public Map<UUID, EventRatingSummaryResponse> getRatingsForEvents(List<UUID> eventIds) {
+        Map<UUID, EventRatingSummaryResponse> ratingsMap = new HashMap<>();
+        for (UUID eventId : eventIds) {
+            ratingsMap.put(eventId, getRatingsForEvent(eventId));
+        }
+        return ratingsMap;
+    }
+
+    public Map<UUID, Boolean> getHasRatedMapForEvents(List<UUID> eventIds, UUID userId) {
+        Map<UUID, Boolean> hasRatedMap = new HashMap<>();
+        for (UUID eventId : eventIds) {
+            hasRatedMap.put(eventId, hasUserRated(eventId, userId));
+        }
+        return hasRatedMap;
     }
 }
 
