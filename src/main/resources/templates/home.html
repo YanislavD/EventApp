@@ -87,7 +87,34 @@
         </div>
     </section>
 
+    <div class="quick-nav-sticky-wrapper">
+        <div class="container">
+            <div class="quick-nav-bar quick-nav-bar-sticky">
+                <div class="quick-nav-title">Бързи пътища:</div>
+                <div class="quick-nav-links">
+                    <a href="#section-created" class="quick-nav-link quick-nav-link-primary">
+                        <span class="quick-nav-icon">📅</span>
+                        <span class="quick-nav-text">Организирани</span>
+                    </a>
+                    <a href="#section-subscribed" class="quick-nav-link quick-nav-link-success">
+                        <span class="quick-nav-icon">🎫</span>
+                        <span class="quick-nav-text">Записани</span>
+                    </a>
+                    <a href="#section-past-created" class="quick-nav-link quick-nav-link-warning" th:if="${!#lists.isEmpty(pastCreatedEvents)}">
+                        <span class="quick-nav-icon">📜</span>
+                        <span class="quick-nav-text">История (създадени)</span>
+                    </a>
+                    <a href="#section-past-subscribed" class="quick-nav-link quick-nav-link-info" th:if="${!#lists.isEmpty(pastSubscribedEvents)}">
+                        <span class="quick-nav-icon">⭐</span>
+                        <span class="quick-nav-text">История (записани)</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container home-sections home-sections-custom">
+
         <div class="card card-tips">
             <div class="tips-content">
                 <span class="tips-icon">💡</span>
@@ -102,9 +129,14 @@
             </div>
         </div>
 
-        <div class="card card-margin-bottom card-padding">
-            <div class="section-header">
-                <div>
+        <div id="section-created" class="events-section-card events-section-card-primary">
+            <div class="events-section-header">
+                <div class="events-section-icon-wrapper">
+                    <div class="events-section-icon-bg events-section-icon-bg-primary">
+                        <span class="events-section-icon">📅</span>
+                    </div>
+                </div>
+                <div class="events-section-title-wrapper">
                     <h2 class="mt-0 reveal section-title">Събития, които организираш</h2>
                     <p class="section-subtitle reveal">Преглеждай и управлявай събитията, които си създал</p>
                 </div>
@@ -112,6 +144,7 @@
                     ➕ Добави събитие
                 </a>
             </div>
+            <div class="events-section-body">
             
             <div class="reveal" th:if="${param.updated}">
                 <div class="alert alert-success alert-custom alert-success-custom">
@@ -177,7 +210,7 @@
                         <a th:href="@{/events/{eventId}/participants(eventId=${event.id})}" class="btn btn-event-action btn-participants">
                             👥 Участници (<span th:text="${event.registeredCount}">0</span>)
                         </a>
-                        <a th:href="@{/events/{eventId}/editform(eventId=${event.id})}" class="btn btn-event-action btn-edit">
+                        <a th:href="@{/events/{eventId}/form(eventId=${event.id})}" class="btn btn-event-action btn-edit">
                             ✏️ Редактирай
                         </a>
                         <form class="event-action-form" th:action="@{'/events/' + ${event.id}}" method="post">
@@ -191,11 +224,17 @@
                     </div>
                 </article>
             </div>
+            </div>
         </div>
 
-        <div class="card card-padding">
-            <div class="section-header">
-                <div>
+        <div id="section-subscribed" class="events-section-card events-section-card-success">
+            <div class="events-section-header">
+                <div class="events-section-icon-wrapper">
+                    <div class="events-section-icon-bg events-section-icon-bg-success">
+                        <span class="events-section-icon">🎫</span>
+                    </div>
+                </div>
+                <div class="events-section-title-wrapper">
                     <h2 class="mt-0 reveal section-title">Събития, за които си записан</h2>
                     <p class="section-subtitle reveal">Предстоящи събития, за които си се регистрирал</p>
                 </div>
@@ -203,6 +242,7 @@
                     🔍 Открий събития
                 </a>
             </div>
+            <div class="events-section-body">
             
             <div class="reveal" th:if="${param.unsubscribed}">
                 <div class="alert alert-success alert-custom alert-success-custom">
@@ -310,15 +350,22 @@
                     </div>
                 </article>
             </div>
+            </div>
         </div>
 
-        <div class="card card-margin-top card-padding" th:if="${!#lists.isEmpty(pastCreatedEvents)}">
-            <div class="section-header">
-                <div>
+        <div id="section-past-created" class="events-section-card events-section-card-warning" th:if="${!#lists.isEmpty(pastCreatedEvents)}">
+            <div class="events-section-header">
+                <div class="events-section-icon-wrapper">
+                    <div class="events-section-icon-bg events-section-icon-bg-warning">
+                        <span class="events-section-icon">📜</span>
+                    </div>
+                </div>
+                <div class="events-section-title-wrapper">
                     <h2 class="mt-0 reveal section-title">Изтекли събития, които си създал</h2>
                     <p class="section-subtitle reveal">История на твоите организирани събития</p>
                 </div>
             </div>
+            <div class="events-section-body">
             
             <div class="events-grid events-grid-custom">
                 <article class="event-card reveal event-card-custom event-card-past" th:each="event : ${pastCreatedEvents}">
@@ -350,15 +397,22 @@
                     </div>
                 </article>
             </div>
+            </div>
         </div>
 
-        <div class="card card-margin-top card-padding" th:if="${!#lists.isEmpty(pastSubscribedEvents)}">
-            <div class="section-header">
-                <div>
+        <div id="section-past-subscribed" class="events-section-card events-section-card-info" th:if="${!#lists.isEmpty(pastSubscribedEvents)}">
+            <div class="events-section-header">
+                <div class="events-section-icon-wrapper">
+                    <div class="events-section-icon-bg events-section-icon-bg-info">
+                        <span class="events-section-icon">⭐</span>
+                    </div>
+                </div>
+                <div class="events-section-title-wrapper">
                     <h2 class="mt-0 reveal section-title">Изтекли събития, за които си бил записан</h2>
                     <p class="section-subtitle reveal">История на твоите участия</p>
                 </div>
             </div>
+            <div class="events-section-body">
             
             <div class="reveal" th:if="${successMessage != null and successMessage.startsWith('✓ Оценката')}">
                 <div class="alert alert-success alert-custom alert-success-custom alert-rating-success">
@@ -438,6 +492,7 @@
                         </div>
                     </div>
                 </article>
+            </div>
             </div>
         </div>
 
@@ -586,6 +641,25 @@
     };
     const observer = new IntersectionObserver(onReveal, { threshold: 0.15 });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Smooth scroll for quick navigation links
+    document.querySelectorAll('.quick-nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                const offset = 100; // Offset for sticky header if needed
+                const elementPosition = targetElement.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
 
     // FAQ Accordion functionality
     document.querySelectorAll('.faq-question-custom').forEach(button => {

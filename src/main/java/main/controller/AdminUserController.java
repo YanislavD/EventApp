@@ -57,7 +57,7 @@ public class AdminUserController {
         return new ModelAndView("redirect:/admin/users");
     }
 
-    @PostMapping("/{userId}/delete")
+    @PostMapping("/{userId}")
     public ModelAndView deleteUser(@PathVariable UUID userId,
                                    Principal principal,
                                    RedirectAttributes redirectAttributes) {
@@ -67,12 +67,9 @@ public class AdminUserController {
             return new ModelAndView("redirect:/admin/users");
         }
 
-        try {
-            userService.deleteUserWithData(userId);
-            redirectAttributes.addFlashAttribute("successMessage", "Потребителят беше изтрит успешно.");
-        } catch (IllegalArgumentException ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-        }
+        userService.deleteUserWithData(userId);
+        redirectAttributes.addFlashAttribute("successMessage", "Потребителят беше изтрит успешно.");
+
         return new ModelAndView("redirect:/admin/users");
     }
 }

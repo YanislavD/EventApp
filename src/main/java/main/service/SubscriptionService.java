@@ -39,13 +39,6 @@ public class SubscriptionService {
                 .collect(Collectors.toSet());
     }
 
-    public List<Event> getSubscribedEvents(UUID userId) {
-        return subscriptionRepository.findByUserId(userId).stream()
-                .map(Subscription::getEvent)
-                .filter(Objects::nonNull)
-                .toList();
-    }
-
     public boolean existsByUserAndEvent(UUID userId, UUID eventId) {
         return subscriptionRepository.existsByUserIdAndEventId(userId, eventId);
     }
@@ -76,16 +69,12 @@ public class SubscriptionService {
         return saved;
     }
 
-    public boolean deleteByUserAndEvent(UUID userId, UUID eventId) {
+    public void deleteByUserAndEvent(UUID userId, UUID eventId) {
         Optional<Subscription> subscription = subscriptionRepository.findByUserIdAndEventId(userId, eventId);
-        if (subscription.isEmpty()) {
-            return false;
-        }
         subscription.ifPresent(value -> {
             ticketService.deleteBySubscriptionId(value.getId());
             subscriptionRepository.delete(value);
         });
-        return true;
     }
 
     @Transactional

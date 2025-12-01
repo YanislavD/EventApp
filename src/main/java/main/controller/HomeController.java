@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.security.Principal;
-import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.Map;
@@ -86,15 +85,12 @@ public class HomeController {
     }
 
     @GetMapping("/events")
-    public ModelAndView events(@RequestParam(value = "sort", required = false) String sortParam,
-                               @RequestParam(value = "category", required = false) UUID categoryId,
+    public ModelAndView events(@RequestParam(value = "category", required = false) UUID categoryId,
                                Principal principal) {
         User user = userService.getByEmail(principal.getName());
-        Sort sort = eventService.resolveSort(sortParam);
         ModelAndView modelAndView = new ModelAndView("events");
-        modelAndView.addObject("events", eventService.getEventsForListing(user.getId(), sort, categoryId));
-        modelAndView.addObject("pastEvents", eventService.getPastEventsForListing(user.getId(), sort, categoryId));
-        modelAndView.addObject("selectedSort", sortParam);
+        modelAndView.addObject("events", eventService.getEventsForListing(user.getId(), categoryId));
+        modelAndView.addObject("pastEvents", eventService.getPastEventsForListing(user.getId(), categoryId));
         modelAndView.addObject("selectedCategory", categoryId);
         modelAndView.addObject("user", user);
         modelAndView.addObject("categories", eventService.getAvailableCategories());

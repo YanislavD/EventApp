@@ -89,10 +89,7 @@ public class EventController {
     @PostMapping("/{eventId}/subscriptions")
     public ModelAndView subscribeToEvent(@PathVariable UUID eventId, Principal principal) {
         User user = userService.getByEmail(principal.getName());
-        boolean subscribed = eventService.subscribeUserToEvent(eventId, user);
-        if (subscribed) {
-            return new ModelAndView("redirect:/events");
-        }
+        eventService.subscribeUserToEvent(eventId, user);
         return new ModelAndView("redirect:/events");
     }
 
@@ -103,12 +100,11 @@ public class EventController {
         boolean unsubscribed = eventService.unsubscribeUserFromEvent(eventId, user);
         if (unsubscribed) {
             redirectAttributes.addFlashAttribute("successMessage", "✓ Успех! Успешно се отписахте от събитието.");
-            return new ModelAndView("redirect:/home");
         }
         return new ModelAndView("redirect:/home");
     }
 
-    @GetMapping("/{eventId}/editform")
+    @GetMapping("/{eventId}/form")
     public ModelAndView showEditForm(@PathVariable UUID eventId, Principal principal) {
         User user = userService.getByEmail(principal.getName());
         EventCreateRequest eventCreateRequest = eventService.buildEditRequest(eventId, user);
@@ -157,7 +153,6 @@ public class EventController {
         User currentUser = userService.getByEmail(principal.getName());
         Event event = eventService.getById(eventId);
 
-        // Проверка дали текущият потребител е организатор на събитието
         if (event.getCreator() == null || !event.getCreator().getId().equals(currentUser.getId())) {
             ModelAndView modelAndView = new ModelAndView("error/oops");
             modelAndView.addObject("title", "Достъпът е отказан");

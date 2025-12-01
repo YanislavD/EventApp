@@ -34,6 +34,20 @@ public class CategoryService {
         return categoryRepository.findByIsActiveTrue(Sort.by(Sort.Direction.ASC, "name"));
     }
 
+    public Category getActiveById(UUID id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Идентификаторът на категорията е задължителен");
+        }
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Категорията не е намерена"));
+        
+        if (category.getIsActive() == null || !category.getIsActive()) {
+            throw new IllegalArgumentException("Не можеш да използваш неактивна категория");
+        }
+        
+        return category;
+    }
+
     @Transactional
     @CacheEvict(value = "categories", allEntries = true)
     public Category create(String name) {

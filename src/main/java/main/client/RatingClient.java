@@ -1,4 +1,4 @@
-package main.web.client;
+package main.client;
 
 import main.web.dto.EventRatingSummaryResponse;
 import main.web.dto.RatingRequest;

@@ -6,6 +6,7 @@
     <title>Вход – EventApp</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
     <link rel="stylesheet" th:href="@{/css/auth.css}" />
+    <link rel="stylesheet" th:href="@{/css/forms.css}" />
 </head>
 <body class="landing">
 <header class="landing-header">
@@ -28,30 +29,44 @@
     </section>
 
     <div class="container">
-        <div class="card card-narrow">
-            <h2 class="mt-0">Вход</h2>
+        <div class="card card-narrow login-card">
+            <div class="form-headline">
+                <span class="form-badge">🔐 Вход в системата</span>
+                <h2 class="mt-0">Вход</h2>
+                <p class="form-subtitle">Влез в своя акаунт, за да управляваш участията си и да откриваш нови събития.</p>
+            </div>
+            
             <form method="post" th:action="@{/login}" th:object="${loginRequest}">
-
                 <div th:if="${param.error}" class="error-message-container">
-                    <span class="badge-error error-badge-block">Невалиден имейл или парола.</span>
+                    <span class="badge-error error-badge-block">⚠️ Невалиден имейл или парола. Моля, опитай отново.</span>
                 </div>
 
-                <label for="email">
-                    <span>Имейл</span>
-                    <span class="badge-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Невалиден имейл</span>
-                </label>
-                <input id="email" name="email" type="email" th:field="*{email}" th:classappend="${#fields.hasErrors('email')} ? 'invalid'" />
+                <div class="field">
+                    <div class="field-header">
+                        <label for="email">
+                            <span>Имейл адрес</span>
+                            <span class="badge-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Невалиден имейл</span>
+                        </label>
+                    </div>
+                    <input id="email" name="email" type="email" th:field="*{email}" placeholder="java@email.com" th:classappend="${#fields.hasErrors('email')} ? 'invalid'" />
+                </div>
 
-                <label for="password">
-                    <span>Парола</span>
-                    <span class="badge-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Невалидна парола</span>
-                </label>
-                <input id="password" name="password" type="password" minlength="6" th:field="*{password}" th:classappend="${#fields.hasErrors('password')} ? 'invalid'" />
+                <div class="field">
+                    <div class="field-header">
+                        <label for="password">
+                            <span>Парола</span>
+                            <span class="badge-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Невалидна парола</span>
+                        </label>
+                    </div>
+                    <input id="password" name="password" type="password" minlength="6" th:field="*{password}" placeholder="Въведи паролата си" th:classappend="${#fields.hasErrors('password')} ? 'invalid'" />
+                </div>
 
-                <button type="submit" class="btn-wide">Вход</button>
+                <div class="form-footer-custom">
+                    <button type="submit" class="btn-wide btn-primary btn-primary-custom">Влез в акаунта</button>
+                </div>
 
-                <p class="center mt-12">
-                    Нямаш акаунт? <a th:href="@{/register}" class="link">Регистрирай се</a>
+                <p class="center mt-12 auth-link-text">
+                    Нямаш акаунт? <a th:href="@{/register}" class="auth-link">Регистрирай се</a>
                 </p>
             </form>
         </div>

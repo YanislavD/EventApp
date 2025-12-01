@@ -16,7 +16,7 @@ public class ScheduledTasks {
         this.eventService = eventService;
     }
 
-    @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(cron = "0 */5 * * * ?")
     public void cleanupPastEvents() {
         logger.info("Starting scheduled task: cleanupPastEvents");
         try {

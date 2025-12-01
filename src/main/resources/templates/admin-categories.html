@@ -114,7 +114,8 @@
                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                 <button type="submit" class="btn category-btn">Деактивирай</button>
                             </form>
-                            <form th:if="${!category.isActive}" th:action="@{'/admin/categories/' + ${category.id} + '/activate'}" method="post" class="category-form">
+                            <form th:if="${!category.isActive}" th:action="@{'/admin/categories/' + ${category.id}}" method="post" class="category-form">
+                                <input type="hidden" name="action" value="activate" />
                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                 <button type="submit" class="btn category-btn category-btn-activate">Активирай</button>
                             </form>

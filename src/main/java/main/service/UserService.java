@@ -1,6 +1,7 @@
 package main.service;
 
 import jakarta.transaction.Transactional;
+import main.event.UserRegisteredEvent;
 import main.exception.UserAlreadyExistsException;
 import main.model.Role;
 import main.model.User;
@@ -8,6 +9,7 @@ import main.repository.UserRepository;
 import main.web.dto.RegisterRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,15 +28,18 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EventService eventService;
     private final SubscriptionService subscriptionService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        EventService eventService,
-                       SubscriptionService subscriptionService) {
+                       SubscriptionService subscriptionService,
+                       ApplicationEventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.eventService = eventService;
         this.subscriptionService = subscriptionService;
+        this.eventPublisher = eventPublisher;
     }
 
     public Long getCount() {
@@ -57,8 +62,9 @@ public class UserService {
                 .updatedOn(LocalDateTime.now())
                 .build();
 
-        userRepository.save(user);
-        logger.info("User registered: {}", user.getEmail());
+        User saved = userRepository.save(user);
+        eventPublisher.publishEvent(new UserRegisteredEvent(this, saved));
+        logger.info("User registered: {}", saved.getEmail());
     }
 
     public void updateNames(UUID userId, String firstName, String lastName) {
@@ -81,11 +87,6 @@ public class UserService {
 
     public List<User> getAll() {
         return userRepository.findAll();
-    }
-
-    public User getById(UUID id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Потребителят не е намерен"));
     }
 
     @Transactional

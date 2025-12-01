@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -32,7 +33,6 @@ public class AdminCategoryController {
     }
 
     @PostMapping
-    @SuppressWarnings("null")
     public ModelAndView createCategory(@Valid @ModelAttribute("categoryCreateRequest") CategoryCreateRequest categoryCreateRequest,
                                        BindingResult bindingResult,
                                        RedirectAttributes redirectAttributes) {
@@ -54,9 +54,12 @@ public class AdminCategoryController {
         return new ModelAndView("redirect:/admin/categories");
     }
 
-    @PostMapping("/{id}/activate")
-    public ModelAndView activateCategory(@PathVariable UUID id) {
-        categoryService.activateById(id);
+    @PostMapping("/{id}")
+    public ModelAndView activateCategory(@PathVariable UUID id,
+                                         @RequestParam(value = "action", required = false) String action) {
+        if ("activate".equals(action)) {
+            categoryService.activateById(id);
+        }
         return new ModelAndView("redirect:/admin/categories");
     }
 

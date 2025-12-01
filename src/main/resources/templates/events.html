@@ -89,22 +89,12 @@
                 <div class="tips-content-small">
                     <div class="tips-title-small">Полезен съвет</div>
                     <div class="tips-text-small">
-                        Използвай филтрите по-долу, за да откриеш точно това, което търсиш. Сортирай по дата или категория и филтрирай според твоите интереси.
+                        Използвай филтъра по-долу, за да откриеш точно това, което търсиш. Филтрирай по категория според твоите интереси.
                     </div>
                 </div>
             </div>
 
             <form class="panel-filters" method="get">
-                <div class="filter-group">
-                    <label for="sort">Сортирай по</label>
-                    <select id="sort" name="sort">
-                        <option value="startAsc" th:selected="${selectedSort == null || selectedSort == 'startAsc'}">Дата (най-скоро)</option>
-                        <option value="startDesc" th:selected="${selectedSort == 'startDesc'}">Дата (най-късно)</option>
-                        <option value="categoryAsc" th:selected="${selectedSort == 'categoryAsc'}">Категория (A-Z)</option>
-                        <option value="categoryDesc" th:selected="${selectedSort == 'categoryDesc'}">Категория (Z-A)</option>
-                    </select>
-                </div>
-
                 <div class="filter-group">
                     <label for="category">Категория</label>
                     <select id="category" name="category">
@@ -118,7 +108,7 @@
 
                 <div class="filter-actions">
                     <button type="submit" class="btn btn-secondary">Приложи</button>
-                    <a class="link-reset" th:if="${selectedCategory != null or (selectedSort != null and selectedSort != 'startAsc')}" th:href="@{/events}">Изчисти</a>
+                    <a class="link-reset" th:if="${selectedCategory != null}" th:href="@{/events}">Изчисти</a>
                 </div>
             </form>
 

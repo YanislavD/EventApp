@@ -1,12 +1,13 @@
 package main.service;
 
+import main.event.EventCreatedEvent;
+import main.event.EventDeletedEvent;
 import main.model.Category;
 import main.model.Event;
 import main.model.Role;
 import main.model.Subscription;
 import main.model.Ticket;
 import main.model.User;
-import main.repository.CategoryRepository;
 import main.repository.EventRepository;
 import main.web.dto.EventCreateRequest;
 import main.web.view.EventView;
@@ -14,16 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Sort;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class EventService {
@@ -31,18 +29,21 @@ public class EventService {
     private static final Logger logger = LoggerFactory.getLogger(EventService.class);
 
     private final EventRepository eventRepository;
-    private final CategoryRepository categoryRepository;
+    private final CategoryService categoryService;
     private final SubscriptionService subscriptionService;
     private final TicketService ticketService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public EventService(EventRepository eventRepository,
-                        CategoryRepository categoryRepository,
+                        CategoryService categoryService,
                         SubscriptionService subscriptionService,
-                        TicketService ticketService) {
+                        TicketService ticketService,
+                        ApplicationEventPublisher eventPublisher) {
         this.eventRepository = eventRepository;
-        this.categoryRepository = categoryRepository;
+        this.categoryService = categoryService;
         this.subscriptionService = subscriptionService;
         this.ticketService = ticketService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Cacheable(value = "stats", key = "'eventCount'")
@@ -51,34 +52,10 @@ public class EventService {
     }
 
     public List<Category> getAvailableCategories() {
-        return categoryRepository.findByIsActiveTrue(Sort.by(Sort.Direction.ASC, "name"));
-    }
-
-    public Sort resolveSort(String sortParam) {
-        if ("startDesc".equalsIgnoreCase(sortParam)) {
-            return Sort.by(Sort.Direction.DESC, "startTime");
-        }
-        if ("categoryAsc".equalsIgnoreCase(sortParam)) {
-            return Sort.by(Sort.Direction.ASC, "category.name").and(Sort.by(Sort.Direction.ASC, "startTime"));
-        }
-        if ("categoryDesc".equalsIgnoreCase(sortParam)) {
-            return Sort.by(Sort.Direction.DESC, "category.name").and(Sort.by(Sort.Direction.ASC, "startTime"));
-        }
-        return Sort.by(Sort.Direction.ASC, "startTime");
-    }
-
-    public List<EventView> getAllEventsForAdmin() {
-        return eventRepository.findAll(Sort.by(Sort.Direction.ASC, "startTime")).stream()
-                .map(event -> toView(event, false, null))
-                .toList();
-    }
-
-    public long getDistinctCategoryCount() {
-        return eventRepository.countDistinctCategories();
+        return categoryService.getAllActive();
     }
 
     public Event getById(UUID eventId) {
-        Objects.requireNonNull(eventId, "Идентификаторът на събитие е задължителен");
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Събитието не е намерено"));
     }
@@ -95,22 +72,8 @@ public class EventService {
 
     public EventCreateRequest buildEditRequest(UUID eventId, User user) {
         Event event = getById(eventId);
-        if (event.getCreator() == null || !event.getCreator().getId().equals(user.getId())) {
-            throw new IllegalStateException("Можеш да редактираш само събития, които си създал");
-        }
-
-        EventCreateRequest eventCreateRequest = new EventCreateRequest();
-        eventCreateRequest.setName(event.getName());
-        eventCreateRequest.setDescription(event.getDescription());
-        eventCreateRequest.setLocation(event.getLocation());
-        eventCreateRequest.setLatitude(event.getLatitude());
-        eventCreateRequest.setLongitude(event.getLongitude());
-        eventCreateRequest.setImageName(event.getImageName());
-        eventCreateRequest.setStartTime(event.getStartTime());
-        eventCreateRequest.setEndTime(event.getEndTime());
-        eventCreateRequest.setCapacity(event.getCapacity());
-        eventCreateRequest.setCategoryId(event.getCategory() != null ? event.getCategory().getId() : null);
-        return eventCreateRequest;
+        validateEventOwnership(event, user);
+        return copyEventToRequest(event);
     }
 
     @Transactional
@@ -125,12 +88,7 @@ public class EventService {
             throw new IllegalArgumentException("Категорията е задължителна");
         }
 
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Категорията не е намерена"));
-
-        if (category.getIsActive() == null || !category.getIsActive()) {
-            throw new IllegalArgumentException("Не можеш да използваш неактивна категория");
-        }
+        Category category = categoryService.getActiveById(categoryId);
 
         Event event = Event.builder()
                 .name(request.getName())
@@ -147,27 +105,26 @@ public class EventService {
                 .build();
 
         Event saved = eventRepository.save(event);
+        eventPublisher.publishEvent(new EventCreatedEvent(this, saved));
         logger.info("Event created successfully: {} by user {}", saved.getName(), creator.getEmail());
         return saved;
     }
 
-    public List<EventView> getEventsForListing(UUID userId, Sort sort, UUID categoryFilter) {
+    public List<EventView> getEventsForListing(UUID userId, UUID categoryFilter) {
         LocalDateTime now = LocalDateTime.now();
         List<Event> events = eventRepository.findUpcomingEvents(now);
         
         events = filterByCategory(events, categoryFilter);
-        events = sortEvents(events, sort, true);
         
         Set<UUID> subscribedEventIds = subscriptionService.getSubscribedEventIds(userId);
         return convertToEventViews(events, subscribedEventIds);
     }
 
-    public List<EventView> getPastEventsForListing(UUID userId, Sort sort, UUID categoryFilter) {
+    public List<EventView> getPastEventsForListing(UUID userId, UUID categoryFilter) {
         LocalDateTime now = LocalDateTime.now();
         List<Event> events = eventRepository.findPastEvents(now);
         
         events = filterByCategory(events, categoryFilter);
-        events = sortEvents(events, sort, false);
         
         Set<UUID> subscribedEventIds = subscriptionService.getSubscribedEventIds(userId);
         return convertToEventViews(events, subscribedEventIds);
@@ -186,34 +143,61 @@ public class EventService {
         }
         return filtered;
     }
-    
-    private List<Event> sortEvents(List<Event> events, Sort sort, boolean defaultAscending) {
-        final boolean ascending;
-        if (sort != null && sort.isSorted()) {
-            Sort.Order order = sort.iterator().next();
-            if (order.getProperty().equals("startTime")) {
-                ascending = order.isAscending();
-            } else {
-                ascending = defaultAscending;
-            }
-        } else {
-            ascending = defaultAscending;
+
+    private void validateEventOwnership(Event event, User user) {
+        if (event.getCreator() == null || !event.getCreator().getId().equals(user.getId())) {
+            throw new IllegalStateException("Можеш да редактираш само събития, които си създал");
         }
-        
-        List<Event> sorted = new java.util.ArrayList<>(events);
-        sorted.sort((e1, e2) -> {
+    }
+
+    private EventCreateRequest copyEventToRequest(Event event) {
+        EventCreateRequest request = new EventCreateRequest();
+        request.setName(event.getName());
+        request.setDescription(event.getDescription());
+        request.setLocation(event.getLocation());
+        request.setLatitude(event.getLatitude());
+        request.setLongitude(event.getLongitude());
+        request.setImageName(event.getImageName());
+        request.setStartTime(event.getStartTime());
+        request.setEndTime(event.getEndTime());
+        request.setCapacity(event.getCapacity());
+        request.setCategoryId(event.getCategory() != null ? event.getCategory().getId() : null);
+        return request;
+    }
+
+    private void copyRequestToEvent(EventCreateRequest request, Event event, Category category) {
+        event.setName(request.getName());
+        event.setDescription(request.getDescription());
+        event.setLocation(request.getLocation());
+        event.setLatitude(request.getLatitude());
+        event.setLongitude(request.getLongitude());
+        event.setImageName(request.getImageName());
+        event.setStartTime(request.getStartTime());
+        event.setEndTime(request.getEndTime());
+        event.setCapacity(request.getCapacity());
+        event.setCategory(category);
+    }
+
+    private void sortEventsByStartTimeAscending(List<Event> events) {
+        events.sort((e1, e2) -> {
             LocalDateTime time1 = e1.getStartTime();
             LocalDateTime time2 = e2.getStartTime();
-            
             if (time1 == null && time2 == null) return 0;
             if (time1 == null) return 1;
             if (time2 == null) return -1;
-            
-            int comparison = time1.compareTo(time2);
-            return ascending ? comparison : -comparison;
+            return time1.compareTo(time2);
         });
-        
-        return sorted;
+    }
+
+    private void sortEventsByStartTimeDescending(List<Event> events) {
+        events.sort((e1, e2) -> {
+            LocalDateTime time1 = e1.getStartTime();
+            LocalDateTime time2 = e2.getStartTime();
+            if (time1 == null && time2 == null) return 0;
+            if (time1 == null) return 1;
+            if (time2 == null) return -1;
+            return time2.compareTo(time1);
+        });
     }
     
     private List<EventView> convertToEventViews(List<Event> events, Set<UUID> subscribedEventIds) {
@@ -230,7 +214,7 @@ public class EventService {
         List<Event> allEvents = eventRepository.findAll();
         LocalDateTime now = LocalDateTime.now();
         
-        List<Event> upcomingEvents = new java.util.ArrayList<>();
+        List<Event> upcomingEvents = new ArrayList<>();
         for (Event event : allEvents) {
             boolean isCreatedByUser = event.getCreator() != null && event.getCreator().getId().equals(userId);
             boolean isNotExpired = event.getEndTime() != null && event.getEndTime().isAfter(now);
@@ -240,16 +224,9 @@ public class EventService {
             }
         }
         
-        upcomingEvents.sort((e1, e2) -> {
-            LocalDateTime time1 = e1.getStartTime();
-            LocalDateTime time2 = e2.getStartTime();
-            if (time1 == null && time2 == null) return 0;
-            if (time1 == null) return 1;
-            if (time2 == null) return -1;
-            return time1.compareTo(time2);
-        });
+        sortEventsByStartTimeAscending(upcomingEvents);
         
-        List<EventView> views = new java.util.ArrayList<>();
+        List<EventView> views = new ArrayList<>();
         for (Event event : upcomingEvents) {
             views.add(toView(event, false, null));
         }
@@ -270,14 +247,7 @@ public class EventService {
             }
         }
         
-        pastEvents.sort((e1, e2) -> {
-            LocalDateTime time1 = e1.getStartTime();
-            LocalDateTime time2 = e2.getStartTime();
-            if (time1 == null && time2 == null) return 0;
-            if (time1 == null) return 1;
-            if (time2 == null) return -1;
-            return time2.compareTo(time1);
-        });
+        sortEventsByStartTimeDescending(pastEvents);
         
         List<EventView> views = new java.util.ArrayList<>();
         for (Event event : pastEvents) {
@@ -290,7 +260,7 @@ public class EventService {
         List<Subscription> subscriptions = subscriptionService.findByUserId(userId);
         LocalDateTime now = LocalDateTime.now();
         
-        java.util.Map<UUID, Ticket> ticketsByEventId = ticketService.getTicketsForUser(userId);
+        Map<UUID, Ticket> ticketsByEventId = ticketService.getTicketsForUser(userId);
         
         List<Event> upcomingEvents = new java.util.ArrayList<>();
         for (Subscription subscription : subscriptions) {
@@ -303,16 +273,9 @@ public class EventService {
             }
         }
         
-        upcomingEvents.sort((e1, e2) -> {
-            LocalDateTime time1 = e1.getStartTime();
-            LocalDateTime time2 = e2.getStartTime();
-            if (time1 == null && time2 == null) return 0;
-            if (time1 == null) return 1;
-            if (time2 == null) return -1;
-            return time1.compareTo(time2);
-        });
+        sortEventsByStartTimeAscending(upcomingEvents);
         
-        List<EventView> views = new java.util.ArrayList<>();
+        List<EventView> views = new ArrayList<>();
         for (Event event : upcomingEvents) {
             Ticket ticket = ticketsByEventId.get(event.getId());
             String ticketCode = ticket != null ? ticket.getCode() : null;
@@ -325,9 +288,9 @@ public class EventService {
         List<Subscription> subscriptions = subscriptionService.findByUserId(userId);
         LocalDateTime now = LocalDateTime.now();
         
-        java.util.Map<UUID, Ticket> ticketsByEventId = ticketService.getTicketsForUser(userId);
+        Map<UUID, Ticket> ticketsByEventId = ticketService.getTicketsForUser(userId);
         
-        List<Event> pastEvents = new java.util.ArrayList<>();
+        List<Event> pastEvents = new ArrayList<>();
         for (Subscription subscription : subscriptions) {
             Event event = subscription.getEvent();
             if (event != null) {
@@ -338,16 +301,9 @@ public class EventService {
             }
         }
         
-        pastEvents.sort((e1, e2) -> {
-            LocalDateTime time1 = e1.getStartTime();
-            LocalDateTime time2 = e2.getStartTime();
-            if (time1 == null && time2 == null) return 0;
-            if (time1 == null) return 1;
-            if (time2 == null) return -1;
-            return time2.compareTo(time1);
-        });
+        sortEventsByStartTimeDescending(pastEvents);
         
-        List<EventView> views = new java.util.ArrayList<>();
+        List<EventView> views = new ArrayList<>();
         for (Event event : pastEvents) {
             Ticket ticket = ticketsByEventId.get(event.getId());
             String ticketCode = ticket != null ? ticket.getCode() : null;
@@ -383,7 +339,6 @@ public class EventService {
 
     @Transactional
     public boolean unsubscribeUserFromEvent(UUID eventId, User user) {
-        Objects.requireNonNull(eventId, "Идентификаторът на събитие е задължителен");
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Събитието не е намерено"));
 
@@ -398,46 +353,27 @@ public class EventService {
 
     @Transactional
     @CacheEvict(value = {"events", "stats"}, allEntries = true)
-    public Event update(UUID eventId, EventCreateRequest request, User user) {
+    public void update(UUID eventId, EventCreateRequest request, User user) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Събитието не е намерено"));
 
-        if (event.getCreator() == null || !event.getCreator().getId().equals(user.getId())) {
-            throw new IllegalStateException("Можеш да редактираш само събития, които си създал");
-        }
+        validateEventOwnership(event, user);
 
         UUID categoryId = request.getCategoryId();
         if (categoryId == null) {
             throw new IllegalArgumentException("Категорията е задължителна");
         }
 
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Категорията не е намерена"));
-
-        if (category.getIsActive() == null || !category.getIsActive()) {
-            throw new IllegalArgumentException("Не можеш да използваш неактивна категория");
-        }
-
-        event.setName(request.getName());
-        event.setDescription(request.getDescription());
-        event.setLocation(request.getLocation());
-        event.setLatitude(request.getLatitude());
-        event.setLongitude(request.getLongitude());
-        event.setImageName(request.getImageName());
-        event.setStartTime(request.getStartTime());
-        event.setEndTime(request.getEndTime());
-        event.setCapacity(request.getCapacity());
-        event.setCategory(category);
+        Category category = categoryService.getActiveById(categoryId);
+        copyRequestToEvent(request, event, category);
 
         Event updated = eventRepository.save(event);
         logger.info("Event updated successfully: {} by user {}", updated.getName(), user.getEmail());
-        return updated;
     }
 
     @Transactional
     @CacheEvict(value = {"events", "stats"}, allEntries = true)
     public void delete(UUID eventId, User user) {
-        Objects.requireNonNull(eventId, "Идентификаторът на събитие е задължителен");
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Събитието не е намерено"));
 
@@ -448,32 +384,23 @@ public class EventService {
             throw new IllegalStateException("Можеш да изтриваш само събития, които си създал, или трябва да си администратор");
         }
 
+        String eventName = event.getName();
+        UUID eventIdToDelete = event.getId();
+        
         subscriptionService.deleteAllByEventId(eventId);
         eventRepository.delete(event);
-        logger.info("Event deleted successfully: {} by user {}", event.getName(), user.getEmail());
+        eventPublisher.publishEvent(new EventDeletedEvent(this, eventIdToDelete, eventName));
+        logger.info("Event deleted successfully: {} by user {}", eventName, user.getEmail());
     }
 
     @Transactional
     @CacheEvict(value = {"events", "stats"}, allEntries = true)
     public void deleteAllByCreatorId(UUID creatorId) {
-        Objects.requireNonNull(creatorId, "Идентификаторът на организатора е задължителен");
         List<Event> events = eventRepository.findByCreatorId(creatorId);
         for (Event event : events) {
             subscriptionService.deleteAllByEventId(event.getId());
             eventRepository.delete(event);
             logger.info("Event deleted as part of user cleanup: {}", event.getName());
-        }
-    }
-
-    @Transactional
-    @CacheEvict(value = {"events", "stats"}, allEntries = true)
-    public void deleteAllByCategoryId(UUID categoryId) {
-        Objects.requireNonNull(categoryId, "Идентификаторът на категорията е задължителен");
-        List<Event> events = eventRepository.findByCategoryId(categoryId);
-        for (Event event : events) {
-            subscriptionService.deleteAllByEventId(event.getId());
-            eventRepository.delete(event);
-            logger.info("Event deleted as part of category deletion: {} (category: {})", event.getName(), categoryId);
         }
     }
 
