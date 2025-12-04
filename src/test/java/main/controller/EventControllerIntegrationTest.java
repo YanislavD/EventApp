@@ -204,6 +204,80 @@ class EventControllerIntegrationTest {
                 .andExpect(model().attributeHasErrors("eventCreateRequest"));
     }
 
+    @Test
+    @WithMockUser(username = "subscriber@example.com")
+    void whenUnsubscribeFromEvent_thenUserIsUnsubscribed() throws Exception {
+        User subscriber = new User();
+        subscriber.setUsername("subscriber");
+        subscriber.setEmail("subscriber@example.com");
+        subscriber.setPassword(passwordEncoder.encode("password123"));
+        subscriber.setRole(Role.USER);
+        subscriber.setCreatedOn(LocalDateTime.now());
+        subscriber.setUpdatedOn(LocalDateTime.now());
+        subscriber = userRepository.save(subscriber);
+
+        Event event = createTestEvent();
+        eventService.subscribeUserToEvent(event.getId(), subscriber);
+
+        mockMvc.perform(delete("/events/{eventId}/subscriptions", event.getId())
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/home"));
+
+        boolean isSubscribed = eventService.getSubscribedEvents(subscriber.getId()).stream()
+                .anyMatch(e -> e.getId().equals(event.getId()));
+
+        assertFalse(isSubscribed);
+    }
+
+    @Test
+    @WithMockUser(username = "test@example.com")
+    void whenGetParticipantsAsOrganizer_thenParticipantsPageIsShown() throws Exception {
+        Event event = createTestEvent();
+
+        mockMvc.perform(get("/events/{eventId}/participants", event.getId()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("event-participants"))
+                .andExpect(model().attributeExists("event"))
+                .andExpect(model().attributeExists("subscriptions"));
+    }
+
+    @Test
+    @WithMockUser(username = "other@example.com")
+    void whenGetParticipantsAsNonOrganizer_thenErrorPageIsShown() throws Exception {
+        User otherUser = new User();
+        otherUser.setUsername("otheruser");
+        otherUser.setEmail("other@example.com");
+        otherUser.setPassword(passwordEncoder.encode("password123"));
+        otherUser.setRole(Role.USER);
+        otherUser.setCreatedOn(LocalDateTime.now());
+        otherUser.setUpdatedOn(LocalDateTime.now());
+        otherUser = userRepository.save(otherUser);
+
+        Event event = createTestEvent();
+
+        mockMvc.perform(get("/events/{eventId}/participants", event.getId()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error/oops"))
+                .andExpect(model().attribute("title", "Достъпът е отказан"))
+                .andExpect(model().attributeExists("message"));
+    }
+
+    @Test
+    @WithMockUser(username = "test@example.com")
+    void whenDeleteEventWithRedirectParam_thenRedirectsToEvents() throws Exception {
+        Event event = createTestEvent();
+        UUID eventId = event.getId();
+
+        mockMvc.perform(delete("/events/{eventId}", eventId)
+                        .with(csrf())
+                        .param("redirect", "events"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/events"));
+
+        assertFalse(eventRepository.findById(eventId).isPresent());
+    }
+
     private Event createTestEvent() {
         Event event = new Event();
         event.setName("Test Event");
