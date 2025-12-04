@@ -27,7 +27,6 @@ public class ScheduledTasks {
         }
     }
 
-
     @Scheduled(fixedRate = 300000)
     public void updateStatistics() {
         logger.info("Starting scheduled task: updateStatistics");

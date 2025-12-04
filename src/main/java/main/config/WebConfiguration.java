@@ -68,5 +68,3 @@ public class WebConfiguration {
         return new HiddenHttpMethodFilter();
     }
 }
-
-

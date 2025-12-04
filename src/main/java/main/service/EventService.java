@@ -1,7 +1,5 @@
 package main.service;
 
-import main.event.EventCreatedEvent;
-import main.event.EventDeletedEvent;
 import main.model.Category;
 import main.model.Event;
 import main.model.Role;
@@ -15,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
@@ -32,18 +29,15 @@ public class EventService {
     private final CategoryService categoryService;
     private final SubscriptionService subscriptionService;
     private final TicketService ticketService;
-    private final ApplicationEventPublisher eventPublisher;
 
     public EventService(EventRepository eventRepository,
                         CategoryService categoryService,
                         SubscriptionService subscriptionService,
-                        TicketService ticketService,
-                        ApplicationEventPublisher eventPublisher) {
+                        TicketService ticketService) {
         this.eventRepository = eventRepository;
         this.categoryService = categoryService;
         this.subscriptionService = subscriptionService;
         this.ticketService = ticketService;
-        this.eventPublisher = eventPublisher;
     }
 
     @Cacheable(value = "stats", key = "'eventCount'")
@@ -105,7 +99,6 @@ public class EventService {
                 .build();
 
         Event saved = eventRepository.save(event);
-        eventPublisher.publishEvent(new EventCreatedEvent(this, saved));
         logger.info("Event created successfully: {} by user {}", saved.getName(), creator.getEmail());
         return saved;
     }
@@ -385,11 +378,9 @@ public class EventService {
         }
 
         String eventName = event.getName();
-        UUID eventIdToDelete = event.getId();
         
         subscriptionService.deleteAllByEventId(eventId);
         eventRepository.delete(event);
-        eventPublisher.publishEvent(new EventDeletedEvent(this, eventIdToDelete, eventName));
         logger.info("Event deleted successfully: {} by user {}", eventName, user.getEmail());
     }
 
