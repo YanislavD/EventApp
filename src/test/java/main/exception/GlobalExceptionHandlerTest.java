@@ -3,6 +3,7 @@ package main.exception;
 import main.controller.AdminCategoryController;
 import main.controller.IndexController;
 import main.controller.RatingController;
+import main.model.User;
 import main.service.CategoryService;
 import main.service.EventService;
 import main.service.RatingService;
@@ -12,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.ArrayList;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -66,9 +70,9 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void whenIllegalArgumentException_thenShow404Page() throws Exception {
-        when(categoryService.getAll()).thenReturn(new java.util.ArrayList<>());
+        when(categoryService.getAll()).thenReturn(new ArrayList<>());
         doThrow(new IllegalArgumentException("Невалиден аргумент"))
-                .when(categoryService).deleteById(any(java.util.UUID.class));
+                .when(categoryService).deleteById(any(UUID.class));
 
         mockMvc.perform(delete("/admin/categories/00000000-0000-0000-0000-000000000000")
                         .with(csrf()))
@@ -79,9 +83,9 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void whenIllegalStateException_thenShowOopsPage() throws Exception {
-        when(categoryService.getAll()).thenReturn(new java.util.ArrayList<>());
+        when(categoryService.getAll()).thenReturn(new ArrayList<>());
         doThrow(new IllegalStateException("Невалидно състояние"))
-                .when(categoryService).activateById(any(java.util.UUID.class));
+                .when(categoryService).activateById(any(UUID.class));
 
         mockMvc.perform(post("/admin/categories/00000000-0000-0000-0000-000000000000")
                         .with(csrf())
@@ -94,15 +98,15 @@ class GlobalExceptionHandlerTest {
     @Test
     void whenIllegalArgumentExceptionFromRatings_thenRedirectToHome() throws Exception {
         main.model.User mockUser = new main.model.User();
-        mockUser.setId(java.util.UUID.randomUUID());
+        mockUser.setId(UUID.randomUUID());
         when(userService.getByEmail(anyString())).thenReturn(mockUser);
         
         doThrow(new IllegalArgumentException("Невалиден event ID"))
-                .when(ratingService).createRating(any(java.util.UUID.class), any(java.util.UUID.class), anyInt());
+                .when(ratingService).createRating(any(UUID.class), any(UUID.class), anyInt());
 
         mockMvc.perform(post("/ratings")
                         .with(csrf())
-                        .param("eventId", java.util.UUID.randomUUID().toString())
+                        .param("eventId", UUID.randomUUID().toString())
                         .param("score", "5"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/home"));
@@ -110,16 +114,16 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void whenIllegalStateExceptionFromRatings_thenRedirectToHome() throws Exception {
-        main.model.User mockUser = new main.model.User();
-        mockUser.setId(java.util.UUID.randomUUID());
+        User mockUser = new User();
+        mockUser.setId(UUID.randomUUID());
         when(userService.getByEmail(anyString())).thenReturn(mockUser);
         
         doThrow(new IllegalStateException("Вече си оценил това събитие"))
-                .when(ratingService).createRating(any(java.util.UUID.class), any(java.util.UUID.class), anyInt());
+                .when(ratingService).createRating(any(UUID.class), any(UUID.class), anyInt());
 
         mockMvc.perform(post("/ratings")
                         .with(csrf())
-                        .param("eventId", java.util.UUID.randomUUID().toString())
+                        .param("eventId",UUID.randomUUID().toString())
                         .param("score", "5"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/home"));
@@ -127,16 +131,16 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void whenRuntimeExceptionFromRatings_thenRedirectToHome() throws Exception {
-        main.model.User mockUser = new main.model.User();
-        mockUser.setId(java.util.UUID.randomUUID());
+        User mockUser = new User();
+        mockUser.setId(UUID.randomUUID());
         when(userService.getByEmail(anyString())).thenReturn(mockUser);
         
         doThrow(new RuntimeException("Грешка при създаване на рейтинг"))
-                .when(ratingService).createRating(any(java.util.UUID.class), any(java.util.UUID.class), anyInt());
+                .when(ratingService).createRating(any(UUID.class), any(UUID.class), anyInt());
 
         mockMvc.perform(post("/ratings")
                         .with(csrf())
-                        .param("eventId", java.util.UUID.randomUUID().toString())
+                        .param("eventId", UUID.randomUUID().toString())
                         .param("score", "5"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/home"));
