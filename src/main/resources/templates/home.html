@@ -14,7 +14,7 @@
 <body class="landing">
 <header class="landing-header">
     <div class="container topbar">
-        <a class="brand" th:href="@{/}">EventApp</a>
+        <a class="brand" th:href="@{/home}">EventApp</a>
         <nav class="nav">
             <a class="nav-link" th:href="@{/events}">Събития</a>
             <a class="nav-link" th:href="@{/admin/categories}" sec:authorize="hasRole('ADMIN')">Категории</a>
@@ -29,7 +29,10 @@
         <div class="hero-bg hero-bg-custom"></div>
         <div class="container hero-inner hero-inner-custom">
             <div class="hero-badge reveal">Твоето табло</div>
-            <h1 class="hero-title hero-title-custom" th:text="${user != null ? 'Здравей, ' + user.username + '!' : 'Моят профил'}">Моят профил</h1>
+            <h1 class="hero-title hero-title-custom">
+                <span th:text="${user != null ? 'Здравей, ' + user.username + '!' : 'Моят профил'}">Моят профил</span>
+                <span class="badge badge-admin" th:if="${user != null and user.role.name() == 'ADMIN'}" style="margin-left: 12px; vertical-align: middle;">ADMIN</span>
+            </h1>
             <p class="hero-subtitle hero-subtitle-custom">Твоите записани събития и предстоящи преживявания</p>
             
             <div class="hero-stats hero-stats-custom">

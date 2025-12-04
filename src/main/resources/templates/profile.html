@@ -11,7 +11,7 @@
 <body class="landing">
 <header class="landing-header">
     <div class="container topbar">
-        <a class="brand" th:href="@{/}">EventApp</a>
+        <a class="brand" th:href="@{/home}">EventApp</a>
         <nav class="nav">
             <a class="nav-link" th:href="@{/home}">Табло</a>
             <a class="nav-link" th:href="@{/admin/categories}" sec:authorize="hasRole('ADMIN')">Категории</a>
@@ -25,7 +25,10 @@
     <section class="hero slim-hero">
         <div class="container hero-inner">
             <div class="hero-badge">Моят профил</div>
-            <h1 class="hero-title" th:text="${user.username}">Потребител</h1>
+            <h1 class="hero-title">
+                <span th:text="${user.username}">Потребител</span>
+                <span class="badge badge-admin" th:if="${user.role.name() == 'ADMIN'}">ADMIN</span>
+            </h1>
             <p class="hero-subtitle">Преглед на данните</p>
             <div class="hero-actions"><a class="btn btn-primary" th:href="@{/profile/{id}(id=${user.id})}">Редактиране</a></div>
         </div>
@@ -55,6 +58,13 @@
                 <article class="feature-card">
                     <div class="meta">Обновен</div>
                     <div th:text="${#temporals.format(user.updatedOn, 'dd.MM.yyyy HH:mm')}">--</div>
+                </article>
+                <article class="feature-card">
+                    <div class="meta">Роля</div>
+                    <div>
+                        <span th:text="${user.role.name()}">USER</span>
+                        <span class="badge badge-admin" th:if="${user.role.name() == 'ADMIN'}" style="margin-left: 8px;">ADMIN</span>
+                    </div>
                 </article>
             </div>
         </div>

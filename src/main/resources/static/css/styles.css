@@ -578,6 +578,25 @@ textarea.invalid {
     color: var(--text);
 }
 
+.badge-admin {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+[data-theme="dark"] .badge-admin {
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    box-shadow: 0 2px 12px rgba(124, 58, 237, 0.4);
+}
+
 /* --- Events list --- */
 .events-grid {
     display: grid;

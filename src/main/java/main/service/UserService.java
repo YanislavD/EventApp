@@ -53,18 +53,25 @@ public class UserService {
             throw new UserAlreadyExistsException("Потребителското име или имейл вече е заето");
         }
 
+        boolean isFirstUser = userRepository.count() == 0;
+        Role userRole = isFirstUser ? Role.ADMIN : Role.USER;
+
         User user = User.builder()
                 .username(registerRequest.getUsername())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .email(registerRequest.getEmail())
-                .role(Role.USER)
+                .role(userRole)
                 .createdOn(LocalDateTime.now())
                 .updatedOn(LocalDateTime.now())
                 .build();
 
         User saved = userRepository.save(user);
         eventPublisher.publishEvent(new UserRegisteredEvent(this, saved));
-        logger.info("User registered: {}", saved.getEmail());
+        if (isFirstUser) {
+            logger.info("First user registered as ADMIN: {}", saved.getEmail());
+        } else {
+            logger.info("User registered: {}", saved.getEmail());
+        }
     }
 
     public void updateNames(UUID userId, String firstName, String lastName) {
