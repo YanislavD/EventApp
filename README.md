@@ -64,7 +64,7 @@ EventApp е web приложение за управление на събити
 
 ### Типове endpoints
 - **Open endpoints** - Доступни без аутентификация (`/`, `/register`)
-- **Authenticated endpoints** - Доступни за всички логнати потребители
+- **Authenticated endpoints** - Достъпни за всички логнати потребители
 - **Authorized endpoints** - Доступни само за администратори (`/admin/**`)
 
 ### Защита
