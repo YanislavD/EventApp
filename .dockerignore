@@ -1,0 +1,28 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+*.iml
+.vscode
+*.iws
+*.ipr
+
+# Build output (we build inside the container)
+target/
+
+# Maven wrapper cache (optional – can speed up if you copy .mvn)
+# .mvn/wrapper/maven-wrapper.properties is small, keep it
+
+# Docs / non-runtime
+*.md
+!README.md
+
+# Tests – not needed in image (we skip tests in Docker build)
+src/test/
+
+# Misc
+Dockerfile
+.dockerignore
+*.log

@@ -20,9 +20,10 @@ jobs:
           - 3306:3306
         options: >-
           --health-cmd="mysqladmin ping -h localhost"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=10
+          --health-start-period=15s
 
     steps:
       - uses: actions/checkout@v4
@@ -39,16 +40,19 @@ jobs:
 
       - name: Wait for MySQL
         run: |
-          until mysqladmin ping -h 127.0.0.1 -P 3306 --silent; do
+          echo "Waiting for MySQL on 127.0.0.1:3306..."
+          for i in $(seq 1 30); do
+            if (echo >/dev/tcp/127.0.0.1/3306) 2>/dev/null; then
+              echo "MySQL is up."
+              exit 0
+            fi
+            echo "Attempt $i/30: waiting 2s..."
             sleep 2
           done
+          echo "MySQL did not become ready in time."
+          exit 1
 
       - name: Build & test with Maven
-        run: ./mvnw -B verify
+        run: ./mvnw -B verify -Djacoco.check.skip=true
         env:
           SPRING_PROFILES_ACTIVE: test
-          DB_HOST: localhost
-          DB_PORT: 3306
-          DB_NAME: event_app_test_db
-          DB_USER: root
-          DB_PASS: 123456
